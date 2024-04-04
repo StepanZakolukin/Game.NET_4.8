@@ -10,7 +10,7 @@ namespace MainWindow
         [STAThread]
         static void Main()
         {
-            var wallMap = File.ReadAllText(@"..\..\UI\WallMap.txt").Split('\n')
+            var wallMap = File.ReadAllText(@"..\..\Model\WallMap.txt").Split('\n')
                 .Select(st => st.Split('\t'))
                 .ToArray();
 

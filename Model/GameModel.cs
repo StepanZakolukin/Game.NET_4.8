@@ -1,21 +1,20 @@
 ﻿using System.Collections.Generic;
-using WindowsForm.UI;
 using System.Windows;
 using System.Drawing;
 using System;
 using System.Windows.Forms;
 
-namespace WindowsForm
+namespace Model
 {
     public static class GameModel
     {
-        public static Tank Player1;
+        public static Tank Player;
 
         public static List<Rect> LocationOfTheWalls = new List<Rect>();
 
         public static void Start(Control control, string[][] wallMap)
         {
-            Player1 = new Tank(@"..\..\UI\Images\Red tank.png",
+            Player = new Tank(@"..\..\Model\Images\Red tank.png",
                 new PointF[] { new PointF(22, 588), new PointF(89, 588), new PointF(22, 634) }, -Math.PI / 2);
 
             for (var i = 0; i < 48; i++)
@@ -27,12 +26,12 @@ namespace WindowsForm
 
             control.Paint += DrawALawn;
             control.Paint += DrawTheWalls;
-            control.Paint += Player1.CurrentFunction;
+            control.Paint += Player.CurrentFunction;
         }
 
         static void DrawTheWalls(object sender, PaintEventArgs e)
         {
-            var pictureWall = Image.FromFile(@"..\..\UI\Images\Wall.png");
+            var pictureWall = Image.FromFile(@"..\..\Model\Images\Wall.png");
 
             foreach (var wall in LocationOfTheWalls)
                 e.Graphics.DrawImage(pictureWall, new System.Drawing.Point((int)wall.X, (int)wall.Y));
@@ -40,7 +39,7 @@ namespace WindowsForm
 
         static void DrawALawn(object sender, PaintEventArgs e)
         {
-            var pictureGrass = Image.FromFile(@"..\..\UI\Images\Grass.jpg");
+            var pictureGrass = Image.FromFile(@"..\..\Model\Images\Grass.jpg");
 
             for (var i = 0; i < 30; i++)
                 for (var j = 0; j < 48; j ++)

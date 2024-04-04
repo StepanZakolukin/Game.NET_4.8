@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
-using WindowsForm;
+using Model;
 
 namespace MainWindow
 {
@@ -18,7 +18,7 @@ namespace MainWindow
             FormBorderStyle = FormBorderStyle.FixedDialog;
             // двойная буфферизация изоображения;
             DoubleBuffered = true;
-            KeyDown += new KeyEventHandler(Controller.Player1KeyDown);
+            KeyDown += new KeyEventHandler(Controller.Controller.PlayerKeyDown);
             GameModel.Start(this, wallMap);
 
             var timer = new Timer();
