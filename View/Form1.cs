@@ -7,15 +7,15 @@ namespace MainWindow
     public partial class MyForm : Form
     {
         public static Size FieldDimensions;
-
+        public static MyForm Current;
         public MyForm(string[][] wallMap)
         {
+            Current = this;
             Text = "Танки";
             InitializeComponent();
-            MaximizeBox = false;
+            BackColor = Color.Black;
             Size = new Size(1072, 699);
-            FieldDimensions = new Size(1060, 655);
-            FormBorderStyle = FormBorderStyle.FixedDialog;
+            FieldDimensions = Size;
             // двойная буфферизация изоображения;
             DoubleBuffered = true;
             KeyDown += new KeyEventHandler(Controller.Controller.PlayerKeyDown);
