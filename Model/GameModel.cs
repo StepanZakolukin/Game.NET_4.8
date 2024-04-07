@@ -39,7 +39,7 @@ namespace Model
 
         public static void UpdateFieldValues()
         {
-            ImageSize = Math.Min(MyForm.Current.Size.Height / 27, MyForm.Current.Size.Width / 48);
+            ImageSize = Math.Min(MyForm.Current.Size.Height / 27 , MyForm.Current.Size.Width / 48);
             InitialCoordinateOfTheMap.X = (MyForm.Current.Size.Width - ImageSize * 48) / 2 - ImageSize / 3;
             InitialCoordinateOfTheMap.Y = (float)((MyForm.Current.Size.Height - ImageSize * 27) / 2 - ImageSize);
         }
