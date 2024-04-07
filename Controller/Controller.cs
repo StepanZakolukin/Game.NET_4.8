@@ -11,16 +11,16 @@ namespace Controller
 
             switch (e.KeyCode)
             {
-                case Keys.Up:
+                case Keys.W:
                     GameModel.Player.GoForward(control);
                     break;
-                case Keys.Down:
+                case Keys.S:
                     GameModel.Player.GoBack(control);
                     break;
-                case Keys.Right:
+                case Keys.D:
                     GameModel.Player.TurnRight(control);
                     break;
-                case Keys.Left:
+                case Keys.A:
                     GameModel.Player.TurnLeft(control);
                     break;
                 default: break;
