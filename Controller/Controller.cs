@@ -23,6 +23,9 @@ namespace Controller
                 case Keys.A:
                     GameModel.Player.TurnLeft(control);
                     break;
+                //case Keys.L: 
+                //    GameModel.Player.Shoot(control);
+                //    break;
                 default: break;
             }
         }
