@@ -23,5 +23,8 @@ namespace WindowsForm
         }
 
         public bool Сontains(Point point) => Dict.ContainsKey(point);
+        public int Count() => Dict.Count;
+
+        public T this[Point point] => Dict[point];
     }
 }

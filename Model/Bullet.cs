@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using Model;
+using System.Windows.Forms;
 
 namespace WindowsForm.Model
 {
@@ -7,6 +8,7 @@ namespace WindowsForm.Model
         public Bullet(string image, Point positionOnTheMap, int angleInDegrees, Control control)
             : base(image, positionOnTheMap, angleInDegrees, control)
         {
+            Priority = 200; 
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Controller
             switch (e.KeyCode)
             {
                 case Keys.W:
-                    GameModel.Player.GoForward(control);
+                    GameModel.Player.MakeAnAttemptToMoveForward(control);
                     break;
                 case Keys.S:
                     GameModel.Player.GoBack(control);
@@ -23,9 +23,9 @@ namespace Controller
                 case Keys.A:
                     GameModel.Player.TurnLeft(control);
                     break;
-                //case Keys.L: 
-                //    GameModel.Player.Shoot(control);
-                //    break;
+                case Keys.L:
+                    GameModel.Player.Shoot(control);
+                    break;
                 default: break;
             }
         }

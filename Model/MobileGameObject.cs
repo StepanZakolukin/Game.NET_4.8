@@ -7,6 +7,8 @@ namespace WindowsForm.Model
 {
     public class MobileGameObject
     {
+        public bool Active;
+        public int Priority;
         public readonly Image Picture;
         public int AngleInDegrees { get; set; }
         public Point PositionOnTheMap { get; set; }
@@ -17,29 +19,57 @@ namespace WindowsForm.Model
             AngleInDegrees = angleInDegrees;
             Picture = Image.FromFile(image);
             PositionOnTheMap = positionOnTheMap;
+            Active = true;
             UpdateTheLocation();
             control.Paint += CurrentFunction;
         }
 
-        public void GoForward(Control control)
+        public bool MakeAnAttemptToMoveForward(Control control)
         {
+            var result = false;
+
             switch (AngleInDegrees % 360)
             {
                 case 90:
-                    if (GameModel.graph[PositionOnTheMap].Forward != null) PositionOnTheMap = GameModel.graph[PositionOnTheMap].Forward.Coordinates;
-                    break;
+                    result = Move(GameModel.GraphOfTheMapPaths[PositionOnTheMap].Forward);
+                    ReplaceTheCharacterRenderingFunction(control);
+                    return result;
                 case 180:
-                    if (GameModel.graph[PositionOnTheMap].Right != null) PositionOnTheMap = GameModel.graph[PositionOnTheMap].Right.Coordinates;
-                    break;
+                    result = Move(GameModel.GraphOfTheMapPaths[PositionOnTheMap].Right);
+                    ReplaceTheCharacterRenderingFunction(control);
+                    return result;
                 case 0:
-                    if (GameModel.graph[PositionOnTheMap].Left != null) PositionOnTheMap = GameModel.graph[PositionOnTheMap].Left.Coordinates;
-                    break;
+                    result = Move(GameModel.GraphOfTheMapPaths[PositionOnTheMap].Left);
+                    ReplaceTheCharacterRenderingFunction(control);
+                    return result;
                 case 270:
-                    if (GameModel.graph[PositionOnTheMap].Back != null) PositionOnTheMap = GameModel.graph[PositionOnTheMap].Back.Coordinates;
-                    break;
+                    result = Move(GameModel.GraphOfTheMapPaths[PositionOnTheMap].Back);
+                    ReplaceTheCharacterRenderingFunction(control);
+                    return result;
             }
 
-            ReplaceTheCharacterRenderingFunction(control);
+            return result;
+        }
+
+        public bool Move(Node NextNode)
+        {
+            if (NextNode != null)
+            {
+                if (!GameModel.ActiveSoldiers.Сontains(NextNode.Coordinates))
+                {
+                    PositionOnTheMap = NextNode.Coordinates;
+                    return true;
+                }
+                else
+                    if (100 != Priority)
+                    {
+                        GameModel.ActiveSoldiers[NextNode.Coordinates].Active = false;
+                        Active = false;
+                    }
+            }
+
+            Active = false;
+            return false;
         }
 
         // обновляет местоположение персонажа
