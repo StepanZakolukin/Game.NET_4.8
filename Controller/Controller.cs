@@ -1,33 +1,48 @@
-﻿using System.Windows.Forms;
-using Model;
+﻿using System;
+using System.Windows.Forms;
+using WindowsForm.Model;
 
 namespace Controller
 {
-    public static class Controller
+    public class Controller
     {
-        public static void PlayerKeyDown(object sender, KeyEventArgs e)
+        public readonly Timer Timer;
+        private readonly GameModel Model;
+        public Controller(GameModel model) 
         {
-            var control = sender as Control;
+            Model = model;
+            Timer = new Timer();
 
+            Timer.Tick += (object sender, EventArgs args) =>
+            {
+                Model.BeginAct();
+                Model.EndAct();
+            };
+
+            Timer.Start();
+        }
+
+        public void MakeAMove(object sender, KeyEventArgs e)
+        {
             switch (e.KeyCode)
             {
-                case Keys.W:
-                    GameModel.Player.MakeAnAttemptToMoveForward(control);
-                    break;
-                case Keys.S:
-                    GameModel.Player.GoBack(control);
-                    break;
-                case Keys.D:
-                    GameModel.Player.TurnRight(control);
-                    break;
-                case Keys.A:
-                    GameModel.Player.TurnLeft(control);
-                    break;
-                case Keys.L:
-                    GameModel.Player.Shoot(control);
-                    break;
+                case Keys.W: Model.Player.GoForwad(); break;
+                case Keys.S: Model.Player.GoBack(); break;
+                case Keys.D: Model.Player.GoRight(); break;
+                case Keys.A: Model.Player.GoLeft(); break;
                 default: break;
             }
+        }
+
+        public void ToShoot(object sender, EventArgs e)
+        {
+            Model.Player.Shoot();
+        }
+
+        public void RotateThePlayer(object sender, MouseEventArgs e)
+        {
+            if (e.Delta >= 120) Model.Player.TurnRight();
+            else if (e.Delta <= -120) Model.Player.TurnLeft();
         }
     }
 }

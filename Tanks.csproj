@@ -47,22 +47,29 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Model\MobileGameObject.cs" />
-    <Compile Include="QueueOfActiveGameObjects.cs" />
+    <Compile Include="Model\GameObjects.cs" />
+    <Compile Include="Model\CreatureAnimation.cs" />
+    <Compile Include="Model\CreatureCommand.cs" />
+    <Compile Include="Model\CSRotatedBy180.cs" />
+    <Compile Include="Model\GameMap.cs" />
     <Compile Include="Model\Bullet.cs" />
-    <Compile Include="Point.cs" />
-    <Compile Include="Node.cs" />
-    <Compile Include="View\Form1.cs">
+    <Compile Include="Model\Point.cs" />
+    <Compile Include="Model\CSRotatedBy0.cs" />
+    <Compile Include="Model\CSRotatedBy270.cs" />
+    <Compile Include="Model\CSRotatedBy90.cs" />
+    <Compile Include="Model\Stone.cs" />
+    <Compile Include="View\MyForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="View\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="View\MyForm.Designer.cs">
+      <DependentUpon>MyForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Model\GameModel.cs" />
     <Compile Include="Controller\Controller.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\Soldier.cs" />
+    <Compile Include="Model\Wall.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -72,8 +79,8 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="View\Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="View\MyForm.resx">
+      <DependentUpon>MyForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -90,9 +97,10 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="Model\Images\Red tank.png" />
-    <Content Include="Model\Images\Wall.png" />
-    <Content Include="Model\Images\Grass.jpg" />
+    <Content Include="Images\камень.jpg" />
+    <Content Include="Images\кирпич.jpg" />
+    <Content Include="Images\пуля.png" />
+    <Content Include="Images\солдат.png" />
     <Content Include="Model\WallMap.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,127 +1,77 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
-using System;
-using System.Windows.Forms;
-using MainWindow;
-using WindowsForm;
-using WindowsForm.Model;
+using System.Linq;
 
-namespace Model
+namespace WindowsForm.Model
 {
-    public static class GameModel
+    public class GameModel
     {
-        private static Control FormControl;
-        public static float ImageSize;
-        public static PointF InitialCoordinateOfTheMap;
-        public static Soldier Player;
-        public static string[][] Map;
-        public static Dictionary<Point, Node> GraphOfTheMapPaths = new Dictionary<Point, Node>();
-        public static QueueOfActiveGameObjects<Bullet> ActivBullets = new QueueOfActiveGameObjects<Bullet>();
-        public static QueueOfActiveGameObjects<Soldier> ActiveSoldiers = new QueueOfActiveGameObjects<Soldier>();
-
-        public static void Start(Control control, string[][] wallMap)
+        public static GameMap Map { get; private set; }
+        public readonly Soldier Player;
+        private readonly List<CreatureAnimation> Animations;
+        public static Point[] OfSets = new Point[] { new Point(0, 1), new Point(0, -1), new Point(-1, 0), new Point(1, 0) };
+        public GameModel(GameMap map)
         {
-            FormControl = control;
-            Map = wallMap;
-            UpdateFieldValues();
-            FillInThePathGraph();
-
-            control.Paint += DrawAMap;
-            Player = new Soldier(@"..\..\Model\Images\солдат.png", new Point(1, 1), 90, control);
-            ActiveSoldiers.Enqueue(new Soldier(@"..\..\Model\Images\солдат.png", new Point(1, 10), 90, control));
+            Map = map;
+            Animations = new List<CreatureAnimation>();
+            Map[1, 1] = new Soldier(90, new Point(1, 1));
+            Player = Map[1, 1] as Soldier;
         }
 
-        public static void UpdateFieldValues()
+        public void BeginAct()
         {
-            ImageSize = Math.Min(MyForm.Current.Size.Height / 18 , MyForm.Current.Size.Width / 32);
-            InitialCoordinateOfTheMap.X = (MyForm.Current.Size.Width - ImageSize * 32) / 2 - ImageSize / 4;
-            InitialCoordinateOfTheMap.Y = (float)((MyForm.Current.Size.Height - ImageSize * 18) / 2 - ImageSize / 2);
-        }
+            Animations.Clear();
 
-        private static Node GetANode(Point neighboringPoint)
-        {
-            if (GraphOfTheMapPaths.ContainsKey(neighboringPoint)) return GraphOfTheMapPaths[neighboringPoint];
-
-            if (!(neighboringPoint.X < 0 || neighboringPoint.X > 31 || neighboringPoint.Y < 0
-                || neighboringPoint.Y > 17 || Map[neighboringPoint.Y][neighboringPoint.X] != "0"))
-                return GraphOfTheMapPaths[neighboringPoint] = new Node(neighboringPoint);
-
-            return null;
-        }
-
-        static void DrawAMap(object sender, PaintEventArgs e)
-        {
-            UpdateFieldValues();
-            Player.UpdateTheLocation();
-
-            CheckForInactiveBullets();
-            CheckForInactiveSoldiers();
-
-            var brick = Image.FromFile(@"..\..\Model\Images\кирпич.jpg");
-            var stone = Image.FromFile(@"..\..\Model\Images\камень.jpg");
-
-            for (var y = 0; y < 18; y++)
-                for (var x = 0; x < 32; x++)
+            for (var x = 0; x < Map.MapWidth; x++)
+                for (var y = 0; y < Map.MapHeight; y++)
                 {
-                    var coordinatesOnTheForm = RecalculateTheCoordinatesOnTheForm(new Point(x, y));
-                    if (Map[y][x] == "0") e.Graphics.DrawImage(stone, coordinatesOnTheForm);
-                    else e.Graphics.DrawImage(brick, coordinatesOnTheForm);
+                    Map[x, y].AngleInDegrees += Map[x, y].Command.AngularDistance;
+
+                    Animations.Add(new CreatureAnimation {
+                            Command = Map[x, y].Command,
+                            Creature = Map[x, y],
+                            Location = Map[x, y].Location,
+                            TargetLogicalLocation = Map[x, y].Location + Map[x, y].Command.Delta });
                 }
         }
 
-        public static PointF[] RecalculateTheCoordinatesOnTheForm(Point positionOnTheMap)
+        public void EndAct()
         {
-            return new PointF[] {
-                new PointF(positionOnTheMap.X * ImageSize + InitialCoordinateOfTheMap.X, positionOnTheMap.Y * ImageSize + InitialCoordinateOfTheMap.Y),
-                new PointF(positionOnTheMap.X * ImageSize + InitialCoordinateOfTheMap.X + ImageSize, positionOnTheMap.Y * ImageSize + InitialCoordinateOfTheMap.Y),
-                new PointF(positionOnTheMap.X *ImageSize + InitialCoordinateOfTheMap.X, positionOnTheMap.Y * ImageSize + InitialCoordinateOfTheMap.Y + ImageSize) };
-        }
+            var creaturesPerLocation = GetCandidatesPerLocation();
 
-        public static void FillInThePathGraph()
-        {
-            for (var x = 0; x < 32; x++)
-                for (var y = 0; y < 18; y++)
-                    if (Map[y][x] == "0")
-                    {
-                        var point = new Point(x, y);
-
-                        if (!GraphOfTheMapPaths.ContainsKey(point)) GraphOfTheMapPaths.Add(point, new Node(point));
-
-                        GraphOfTheMapPaths[point].Forward = GetANode(point + new Point(0, 1));
-                        GraphOfTheMapPaths[point].Left = GetANode(point + new Point(1, 0));
-                        GraphOfTheMapPaths[point].Back = GetANode(point + new Point(0, -1));
-                        GraphOfTheMapPaths[point].Right = GetANode(point + new Point(-1, 0));
-                    }
-        }
-
-        public static void CheckForInactiveSoldiers()
-        {
-            var countActiveSoldiers = ActiveSoldiers.Count();
-
-            for (var i = 0; i < countActiveSoldiers; i++)
-            {
-                var solidier = ActiveSoldiers.Dequeue();
-
-                if (solidier.Active) ActiveSoldiers.Enqueue(solidier);
-                else FormControl.Paint -= solidier.CurrentFunction;
-            }
-        }
-
-        public static void CheckForInactiveBullets()
-        {
-            var countActiveBillets = ActivBullets.Count();
-
-            for (var i = 0; i < countActiveBillets; i++)
-            {
-                var bullet = ActivBullets.Dequeue();
-
-                if (bullet.Active)
+            for (var x = 0; x < Map.MapWidth; x++)
+                for (var y = 0; y < Map.MapHeight; y++)
                 {
-                    bullet.MakeAnAttemptToMoveForward(FormControl);
-                    ActivBullets.Enqueue(bullet);
+                    var creature = SelectWinnerCandidatePerLocation(creaturesPerLocation, x, y);
+                    creature.Location = new Point(x, y);
+                    if (creature is Soldier) creature.Command = new CreatureCommand();
+                    Map[x, y] = creature;
                 }
-                else FormControl.Paint -= bullet.CurrentFunction;
+        }
+
+        private List<GameObjects>[,] GetCandidatesPerLocation()
+        {
+            var creatures = new List<GameObjects>[Map.MapWidth, Map.MapHeight];
+
+            for (var x = 0; x < Map.MapWidth; x++)
+                for (var y = 0; y < Map.MapHeight; y++)
+                    creatures[x, y] = new List<GameObjects>();
+
+            foreach (var e in Animations)
+            {
+                var x = e.TargetLogicalLocation.X;
+                var y = e.TargetLogicalLocation.Y;
+                var nextCreature = e.Command.TransformTo ?? e.Creature;
+                creatures[x, y].Add(nextCreature);
             }
+
+            return creatures;
+        }
+
+        private static GameObjects SelectWinnerCandidatePerLocation(List<GameObjects>[,] creatures, int x, int y)
+        {
+            var sortedСreatures = creatures[x, y].OrderBy(creature => creature.Priority);
+
+            return sortedСreatures.Any() ? sortedСreatures.Last() : new Stone(new Point(x, y));
         }
     }
 }

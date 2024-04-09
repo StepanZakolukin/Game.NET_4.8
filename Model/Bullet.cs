@@ -1,14 +1,32 @@
-﻿using Model;
-using System.Windows.Forms;
-
-namespace WindowsForm.Model
+﻿namespace WindowsForm.Model
 {
-    public class Bullet : MobileGameObject
+    public class Bullet : GameObjects
     {
-        public Bullet(string image, Point positionOnTheMap, int angleInDegrees, Control control)
-            : base(image, positionOnTheMap, angleInDegrees, control)
+        public Bullet(int angleInDegrees, Point location, string pathToTheFile = @"..\..\Images\пуля.png") : base(location, pathToTheFile)
         {
-            Priority = 200; 
+            AngleInDegrees = angleInDegrees;
+            DrawingPriority = 1;
+            Priority = 100;
+            GoForwad();
+        }
+
+        public void GoForwad()
+        {
+            switch (AngleInDegrees % 360)
+            {
+                case 90:
+                    Command.Delta = GameModel.OfSets[(int)CSRotatedBy90.Forward];
+                    break;
+                case 180:
+                    Command.Delta = GameModel.OfSets[(int)CSRotatedBy180.Forward];
+                    break;
+                case 0:
+                    Command.Delta = GameModel.OfSets[(int)CSRotatedBy0.Forward];
+                    break;
+                case 270:
+                    Command.Delta = GameModel.OfSets[(int)CSRotatedBy270.Forward];
+                    break;
+            }
         }
     }
 }

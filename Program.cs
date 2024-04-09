@@ -1,7 +1,6 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
 using System.Windows.Forms;
+using WindowsForm.Model;
 
 namespace MainWindow
 {
@@ -10,11 +9,7 @@ namespace MainWindow
         [STAThread]
         static void Main()
         {
-            var wallMap = File.ReadAllText(@"..\..\Model\WallMap.txt").Split('\n')
-                .Select(st => st.Split('\t'))
-                .ToArray();
-
-            Application.Run(new MyForm(wallMap));
+            Application.Run(new MyForm(new GameModel(new GameMap())));
         }
     }
 }
