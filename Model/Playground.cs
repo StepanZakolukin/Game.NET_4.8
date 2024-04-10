@@ -3,13 +3,14 @@ using System.Linq;
 
 namespace WindowsForm.Model
 {
-    public class GameMap
+    public class Playground
     {
         public GameObjects[,] Map;
         public readonly int Height;
         public readonly int Width;
+        public static Point[] OfSets = new Point[] { new Point(0, 1), new Point(0, -1), new Point(-1, 0), new Point(1, 0) };
 
-        public GameMap(string pathToTheFile = @"..\..\Model\WallMap.txt") 
+        public Playground(string pathToTheFile = @"..\..\Model\WallMap.txt") 
         {
             var wallMap = File.ReadAllText(pathToTheFile).Split('\n')
                 .Select(st => st.Split('\t'))

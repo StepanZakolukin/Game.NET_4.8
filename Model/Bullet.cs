@@ -15,16 +15,16 @@
             switch (AngleInDegrees % 360)
             {
                 case 90:
-                    Command.Delta = GameModel.OfSets[(int)CSRotatedBy90.Forward];
+                    Command.Delta = Playground.OfSets[(int)CSRotatedBy90.Forward];
                     break;
                 case 180:
-                    Command.Delta = GameModel.OfSets[(int)CSRotatedBy180.Forward];
+                    Command.Delta = Playground.OfSets[(int)CSRotatedBy180.Forward];
                     break;
                 case 0:
-                    Command.Delta = GameModel.OfSets[(int)CSRotatedBy0.Forward];
+                    Command.Delta = Playground.OfSets[(int)CSRotatedBy0.Forward];
                     break;
                 case 270:
-                    Command.Delta = GameModel.OfSets[(int)CSRotatedBy270.Forward];
+                    Command.Delta = Playground.OfSets[(int)CSRotatedBy270.Forward];
                     break;
             }
         }

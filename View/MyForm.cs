@@ -10,7 +10,7 @@ namespace MainWindow
         public float ImageSize { get; private set; } 
         public PointF InitialCoordinateOfTheMap { get; private set; }
 
-        public MyForm(GameModel model)
+        public MyForm(Model model)
         {
             InitializeComponent();
             DoubleBuffered = true;
@@ -39,19 +39,19 @@ namespace MainWindow
             var stone = Image.FromFile(@"..\..\Images\камень.jpg");
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-            for (var x = 0; x < GameModel.Map.Width; x++)
-                for (var y = 0; y < GameModel.Map.Height; y++)
+            for (var x = 0; x < Model.Map.Width; x++)
+                for (var y = 0; y < Model.Map.Height; y++)
                 {
-                    var image = GameModel.Map[x, y].Picture;
+                    var image = Model.Map[x, y].Picture;
                     var coordinatesOnTheForm = RecalculateTheCoordinatesOnTheForm(new System.Drawing.Point(x, y));
 
-                    if (GameModel.Map[x, y] is Wall) e.Graphics.DrawImage(image, coordinatesOnTheForm);
+                    if (Model.Map[x, y] is Wall) e.Graphics.DrawImage(image, coordinatesOnTheForm);
                     else
                     {
                         e.Graphics.DrawImage(stone, coordinatesOnTheForm);
 
-                        if (!(GameModel.Map[x, y] is Stone))
-                            e.Graphics.DrawImage(image, RotateAnArrayOfPoints(coordinatesOnTheForm, GameModel.Map[x, y].AngleInDegrees * Math.PI / 180));
+                        if (!(Model.Map[x, y] is Stone))
+                            e.Graphics.DrawImage(image, RotateAnArrayOfPoints(coordinatesOnTheForm, Model.Map[x, y].AngleInDegrees * Math.PI / 180));
                     }
                 }
         }

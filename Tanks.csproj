@@ -52,7 +52,7 @@
     <Compile Include="Model\CreatureAnimation.cs" />
     <Compile Include="Model\CreatureCommand.cs" />
     <Compile Include="Model\CSRotatedBy180.cs" />
-    <Compile Include="Model\GameMap.cs" />
+    <Compile Include="Model\Playground.cs" />
     <Compile Include="Model\Bullet.cs" />
     <Compile Include="Model\FindingAWay.cs" />
     <Compile Include="Model\Point.cs" />
@@ -67,7 +67,7 @@
     <Compile Include="View\MyForm.Designer.cs">
       <DependentUpon>MyForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Model\GameModel.cs" />
+    <Compile Include="Model\Model.cs" />
     <Compile Include="Controller\Controller.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

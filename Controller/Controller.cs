@@ -7,8 +7,8 @@ namespace Controller
     public class Controller
     {
         public readonly Timer Timer;
-        private readonly GameModel Model;
-        public Controller(GameModel model) 
+        private readonly Model Model;
+        public Controller(Model model) 
         {
             Model = model;
             Timer = new Timer();
@@ -22,30 +22,29 @@ namespace Controller
         {
             switch (e.KeyCode)
             {
-                case Keys.W: GameModel.Player.GoForwad(); break;
-                case Keys.S: GameModel.Player.GoBack(); break;
-                case Keys.D: GameModel.Player.GoRight(); break;
-                case Keys.A: GameModel.Player.GoLeft(); break;
+                case Keys.W: Model.Player.GoForwad(); break;
+                case Keys.S: Model.Player.GoBack(); break;
+                case Keys.D: Model.Player.GoRight(); break;
+                case Keys.A: Model.Player.GoLeft(); break;
                 default: break;
             }
         }
 
         public void ToShoot(object sender, EventArgs e)
         {
-            GameModel.Player.Shoot();
+            Model.Player.Shoot();
         }
 
         public void RotateThePlayer(object sender, MouseEventArgs e)
         {
-            if (e.Delta >= 120) GameModel.Player.TurnRight();
-            else if (e.Delta <= -120) GameModel.Player.TurnLeft();
+            if (e.Delta >= 120) Model.Player.TurnRight();
+            else if (e.Delta <= -120) Model.Player.TurnLeft();
         }
 
         private void UpdateTheModel(object sender, EventArgs args)
         {
-            Model.BeginAct();
-            Model.EndAct();
-            GameModel.Bot.MakeAMove();
+            Model.ExecuteTheCommandsOfTheHeroes();
+            Model.Bot.MakeAMove();
         }
     }
 }

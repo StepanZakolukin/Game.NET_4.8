@@ -9,7 +9,7 @@ namespace MainWindow
         [STAThread]
         static void Main()
         {
-            Application.Run(new MyForm(new GameModel(new GameMap())));
+            Application.Run(new MyForm(new Model(new Playground())));
         }
     }
 }

@@ -4,40 +4,41 @@ using System.Linq;
 
 namespace WindowsForm.Model
 {
-    public class GameModel
+    public class Model
     {
         public event Action StateChanged;
-        public static GameMap Map { get; private set; }
+        public static Playground Map { get; private set; }
         public static Bot Bot { get; private set; }
         public static Soldier Player { get; private set; }
-        private readonly List<CreatureAnimation> Animations;
-        public static Point[] OfSets = new Point[] { new Point(0, 1), new Point(0, -1), new Point(-1, 0), new Point(1, 0) };
-        public GameModel(GameMap map)
+        public Model(Playground map)
         {
             Map = map;
-            Animations = new List<CreatureAnimation>();
             Map[30, 1] = new Soldier(90, new Point(30, 1));
             Player = (Soldier)Map[30, 1];
             Map[1, 1] = new Bot(new Point(1, 1));
             Bot = (Bot)Map[1, 1];
         }
 
-        public void BeginAct()
+        public List<GameObjects>[,] GetCandidatesPerLocation()
         {
-            Animations.Clear();
+            var creatures = new List<GameObjects>[Map.Width, Map.Height];
+
+            for (var x = 0; x < Map.Width; x++)
+                for (var y = 0; y < Map.Height; y++)
+                    creatures[x, y] = new List<GameObjects>();
 
             for (var x = 0; x < Map.Width; x++)
                 for (var y = 0; y < Map.Height; y++)
                 {
-                    Animations.Add(new CreatureAnimation {
-                            Command = Map[x, y].Command,
-                            Creature = Map[x, y],
-                            Location = Map[x, y].Location,
-                            TargetLogicalLocation = Map[x, y].Location + Map[x, y].Command.Delta });
+                    var targetLogicalLocation = Map[x, y].Location + Map[x, y].Command.Delta;
+                    var nextCreature = Map[x, y].Command.TransformTo ?? Map[x, y];
+                    creatures[targetLogicalLocation.X, targetLogicalLocation.Y].Add(nextCreature);
                 }
+
+            return creatures;
         }
 
-        public void EndAct()
+        public void ExecuteTheCommandsOfTheHeroes()
         {
             var creaturesPerLocation = GetCandidatesPerLocation();
 
@@ -52,25 +53,6 @@ namespace WindowsForm.Model
                 }
 
             StateChanged();
-        }
-
-        private List<GameObjects>[,] GetCandidatesPerLocation()
-        {
-            var creatures = new List<GameObjects>[Map.Width, Map.Height];
-
-            for (var x = 0; x < Map.Width; x++)
-                for (var y = 0; y < Map.Height; y++)
-                    creatures[x, y] = new List<GameObjects>();
-
-            foreach (var e in Animations)
-            {
-                var x = e.TargetLogicalLocation.X;
-                var y = e.TargetLogicalLocation.Y;
-                var nextCreature = e.Command.TransformTo ?? e.Creature;
-                creatures[x, y].Add(nextCreature);
-            }
-
-            return creatures;
         }
 
         private static GameObjects SelectWinnerCandidatePerLocation(List<GameObjects>[,] creatures, int x, int y)

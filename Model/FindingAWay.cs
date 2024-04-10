@@ -14,15 +14,15 @@ namespace WindowsForm.Model
             {
                 var point = queue.Dequeue();
 
-                if (!GameModel.Map.InBounds(point.Value) || GameModel.Map[point.Value] is Wall
-                    || GameModel.Map[point.Value] is Bullet || GameModel.Map[point.Value] is Bot)
+                if (!Model.Map.InBounds(point.Value) || Model.Map[point.Value] is Wall
+                    || Model.Map[point.Value] is Bullet || Model.Map[point.Value] is Bot)
                     continue;
 
                 if (startingPositions.Contains(point.Value)) yield return point;
 
-                foreach (var offset in GameModel.OfSets)
+                foreach (var ofset in Playground.OfSets)
                 {
-                    var nextPoint = point.Value + offset;
+                    var nextPoint = point.Value + ofset;
 
                     if (visited.Contains(nextPoint)) continue;
 
