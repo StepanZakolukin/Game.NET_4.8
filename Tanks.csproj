@@ -54,7 +54,7 @@
     <Compile Include="Model\CSRotatedBy180.cs" />
     <Compile Include="Model\GameMap.cs" />
     <Compile Include="Model\Bullet.cs" />
-    <Compile Include="Model\PathFinder.cs" />
+    <Compile Include="Model\FindingAWay.cs" />
     <Compile Include="Model\Point.cs" />
     <Compile Include="Model\CSRotatedBy0.cs" />
     <Compile Include="Model\CSRotatedBy270.cs" />

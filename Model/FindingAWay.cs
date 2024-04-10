@@ -2,23 +2,23 @@
 
 namespace WindowsForm.Model
 {
-    public class PathFinder
+    public static class FindingAWay
     {
-        public static SinglyLinkedList<Point> FindPaths(Point start, Point purpose)
+        public static IEnumerable<SinglyLinkedList<Point>> FindAWay(Point finish, HashSet<Point> startingPositions)
         {
             var queue = new Queue<SinglyLinkedList<Point>>();
-            queue.Enqueue(new SinglyLinkedList<Point>(start));
-            var visited = new HashSet<Point>() { start };
+            queue.Enqueue(new SinglyLinkedList<Point>(finish));
+            var visited = new HashSet<Point>() { finish };
 
             while (queue.Count > 0)
             {
                 var point = queue.Dequeue();
 
                 if (!GameModel.Map.InBounds(point.Value) || GameModel.Map[point.Value] is Wall
-                    || GameModel.Map[point.Value] is Soldier || GameModel.Map[point.Value] is Bullet)
+                    || GameModel.Map[point.Value] is Bullet || GameModel.Map[point.Value] is Bot)
                     continue;
 
-                if (point.Value == purpose) return point;
+                if (startingPositions.Contains(point.Value)) yield return point;
 
                 foreach (var offset in GameModel.OfSets)
                 {
@@ -31,7 +31,7 @@ namespace WindowsForm.Model
                 }
             }
 
-            return null;
+            yield break;
         }
     }
 }

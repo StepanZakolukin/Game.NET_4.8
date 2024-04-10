@@ -7,27 +7,28 @@ namespace MainWindow
 {
     public partial class MyForm : Form
     {
-        private readonly MyForm Current;
         public float ImageSize { get; private set; } 
         public PointF InitialCoordinateOfTheMap { get; private set; }
 
         public MyForm(GameModel model)
         {
-            Current = this;
-            Text = "Последний защитник Брестской Крепости";
             InitializeComponent();
+            DoubleBuffered = true;
             BackColor = Color.Black;
             Size = new Size(1072, 699);
-            DoubleBuffered = true;
+            Text = "Последний защитник Брестской Крепости";
+
             var controller = new Controller.Controller(model);
-            controller.Timer.Tick += TimerTick;
+            Click += controller.ToShoot;
+            KeyDown += controller.MakeAMove;
+            MouseWheel += controller.RotateThePlayer;
+
             Paint += DrawAModel;
-            KeyDown += new KeyEventHandler(controller.MakeAMove);
-            Click += new EventHandler(controller.ToShoot);
-            MouseWheel += new MouseEventHandler(controller.RotateThePlayer);
+
+            model.StateChanged += UpdateTheDisplay;
         }
 
-        private void TimerTick(object sender, EventArgs args)
+        private void UpdateTheDisplay()
         {
             UpdateFieldValues();
             Invalidate();
@@ -38,8 +39,8 @@ namespace MainWindow
             var stone = Image.FromFile(@"..\..\Images\камень.jpg");
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-            for (var x = 0; x < GameModel.Map.MapWidth; x++)
-                for (var y = 0; y < GameModel.Map.MapHeight; y++)
+            for (var x = 0; x < GameModel.Map.Width; x++)
+                for (var y = 0; y < GameModel.Map.Height; y++)
                 {
                     var image = GameModel.Map[x, y].Picture;
                     var coordinatesOnTheForm = RecalculateTheCoordinatesOnTheForm(new System.Drawing.Point(x, y));
@@ -65,10 +66,10 @@ namespace MainWindow
 
         private void UpdateFieldValues()
         {
-            ImageSize = Math.Min(Current.Size.Height / 18, Current.Size.Width / 32);
+            ImageSize = Math.Min(Size.Height / 18, Size.Width / 32);
 
-            InitialCoordinateOfTheMap = new PointF((Current.Size.Width - ImageSize * 32) / 2 - ImageSize / 4,
-                (Current.Size.Height - ImageSize * 18) / 2 - ImageSize / 2);
+            InitialCoordinateOfTheMap = new PointF((Size.Width - ImageSize * 32) / 2 - ImageSize / 4,
+                (Size.Height - ImageSize * 18) / 2 - ImageSize / 2);
         }
 
         private PointF[] RotateAnArrayOfPoints(PointF[] points, double turn)
