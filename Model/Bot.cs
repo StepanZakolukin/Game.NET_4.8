@@ -3,15 +3,13 @@ using System.Linq;
 
 namespace WindowsForm.Model
 {
-    public class Bot : GameObjects
+    public class Bot : Characters
     {
         public Bot(Point location, string pathToTheFile = @"..\..\Images\солдат.png") : base(location, pathToTheFile)
         {
             Priority = 80;
             DrawingPriority = 1;
         }
-
-        public void MoveIsCompleted() => Command.Delta = new Point(0, 0);
 
         public void MakeAMove()
         {
@@ -60,35 +58,12 @@ namespace WindowsForm.Model
                 Shoot(); return;
             }
 
-            var followingLocation = FindingAWay.FindAWay(Model.Player.Location, Playground.OfSets
+            var followingLocation = FindingAWay.FindAWay(Model.Player.Location, Walker.OfSets
                 .Select(ofset => Location + ofset)
                 .ToHashSet())
                 .FirstOrDefault();
 
             if (followingLocation != null) Command.Delta = followingLocation.Value - Location;
-        }
-
-        public void Shoot()
-        {
-            switch (AngleInDegrees % 360)
-            {
-                case 90:
-                    if (!(Model.Map[Playground.OfSets[(int)CSRotatedBy90.Forward] + Location] is Wall))
-                        Model.Map[Playground.OfSets[(int)CSRotatedBy90.Forward] + Location] = new Bullet(AngleInDegrees, Location);
-                    break;
-                case 180:
-                    if (!(Model.Map[Playground.OfSets[(int)CSRotatedBy180.Forward] + Location] is Wall))
-                        Model.Map[Playground.OfSets[(int)CSRotatedBy180.Forward] + Location] = new Bullet(AngleInDegrees, Location);
-                    break;
-                case 0:
-                    if (!(Model.Map[Playground.OfSets[(int)CSRotatedBy0.Forward] + Location] is Wall))
-                        Model.Map[Playground.OfSets[(int)CSRotatedBy0.Forward] + Location] = new Bullet(AngleInDegrees, Location);
-                    break;
-                case 270:
-                    if (!(Model.Map[Playground.OfSets[(int)CSRotatedBy270.Forward] + Location] is Wall))
-                        Model.Map[Playground.OfSets[(int)CSRotatedBy270.Forward] + Location] = new Bullet(AngleInDegrees, Location);
-                    break;
-            }
         }
     }
 }

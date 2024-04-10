@@ -7,26 +7,15 @@
             AngleInDegrees = angleInDegrees;
             DrawingPriority = 1;
             Priority = 100;
-            GoForwad();
+            Forward();
         }
 
-        public void GoForwad()
+        public void Forward()
         {
-            switch (AngleInDegrees % 360)
-            {
-                case 90:
-                    Command.Delta = Playground.OfSets[(int)CSRotatedBy90.Forward];
-                    break;
-                case 180:
-                    Command.Delta = Playground.OfSets[(int)CSRotatedBy180.Forward];
-                    break;
-                case 0:
-                    Command.Delta = Playground.OfSets[(int)CSRotatedBy0.Forward];
-                    break;
-                case 270:
-                    Command.Delta = Playground.OfSets[(int)CSRotatedBy270.Forward];
-                    break;
-            }
+            var neighbour = Model.Map[Walker.MovingForwad[AngleInDegrees % 360] + Location];
+
+            if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
+                Command.Delta = Walker.MovingForwad[AngleInDegrees % 360];
         }
     }
 }

@@ -7,16 +7,16 @@ namespace WindowsForm.Model
     public class Model
     {
         public event Action StateChanged;
+        public List<Bot> ArmyOfBots;
+        public static event Action<int, int> CommandsAreExecuted;
         public static Playground Map { get; private set; }
-        public static Bot Bot { get; private set; }
         public static Soldier Player { get; private set; }
         public Model(Playground map)
         {
             Map = map;
             Map[30, 1] = new Soldier(90, new Point(30, 1));
             Player = (Soldier)Map[30, 1];
-            Map[1, 1] = new Bot(new Point(1, 1));
-            Bot = (Bot)Map[1, 1];
+            ArmyOfBots = new List<Bot>();
         }
 
         public List<GameObjects>[,] GetCandidatesPerLocation()
@@ -45,11 +45,9 @@ namespace WindowsForm.Model
             for (var x = 0; x < Map.Width; x++)
                 for (var y = 0; y < Map.Height; y++)
                 {
-                    var creature = SelectWinnerCandidatePerLocation(creaturesPerLocation, x, y);
-                    if (creature is Soldier soldier) soldier.MoveIsCompleted();
-                    else if (creature is Bot bot) bot.MoveIsCompleted();
-                    creature.Location = new Point(x, y);
-                    Map[x, y] = creature;
+                    Map[x, y] = SelectWinnerCandidatePerLocation(creaturesPerLocation, x, y);
+                    Map[x, y].UpdateTheLocation(x, y);
+                    if (Map[x, y] is Characters characters) characters.CommandAreExecuted();
                 }
 
             StateChanged();
@@ -60,6 +58,30 @@ namespace WindowsForm.Model
             var sortedСreatures = creatures[x, y].OrderBy(creature => creature.Priority);
 
             return sortedСreatures.Any() ? sortedСreatures.Last() : new Stone(new Point(x, y));
+        }
+
+        public void CreateABot()
+        {
+            var location = FindAPositionToCreateABot();
+            Map[location] = new Bot(location);
+            ArmyOfBots.Add((Bot)Map[location]);
+        }
+
+        public void SetTheBotsInMotion()
+        {
+            foreach (var bot in ArmyOfBots)
+                bot.MakeAMove();
+        }
+
+        private Point FindAPositionToCreateABot()
+        {
+            var random = new Random();
+            (var x, var y) = (int.MaxValue, int.MaxValue);
+
+            while (!Map.InBounds(new Point(x, y)) || !(Map[x, y] is Stone))
+                (x, y) = (random.Next(1, Map.Width - 1), random.Next(1, Map.Height - 1));
+
+            return new Point(x, y);
         }
     }
 }

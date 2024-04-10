@@ -1,6 +1,6 @@
 ﻿namespace WindowsForm.Model
 {
-    public class Soldier : GameObjects
+    public class Soldier : Characters
     {
         public Soldier(int angleInDegrees, Point location, string pathToTheFile = @"..\..\Images\солдат.png") : base(location, pathToTheFile)
         {
@@ -13,141 +13,36 @@
 
         public void TurnRight() => AngleInDegrees += 90;
 
-        public void MoveIsCompleted() => Command.Delta = new Point(0, 0);
-
         public void GoBack()
         {
-            GameObjects neighbour;
-            switch (AngleInDegrees % 360)
-            {
-                case 90:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy90.Back] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy90.Back];
-                    break;
-                case 180:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy180.Back] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy180.Back];
-                    break;
-                case 0:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy0.Back] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy0.Back];
-                    break;
-                case 270:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy270.Back] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy270.Back];
-                    break;
-            }
+            var neighbour = Model.Map[Walker.MovingBack[AngleInDegrees % 360] + Location];
+
+            if (!(neighbour is Wall || neighbour is Bot || neighbour is Bullet))
+                Command.Delta = Walker.MovingBack[AngleInDegrees % 360];
         }
 
         public void GoForwad()
         {
-            GameObjects neighbour;
-            switch (AngleInDegrees % 360)
-            {
-                case 90:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy90.Forward] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy90.Forward];
-                    break;
-                case 180:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy180.Forward] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy180.Forward];
-                    break;
-                case 0:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy0.Forward] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy0.Forward];
-                    break;
-                case 270:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy270.Forward] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy270.Forward];
-                    break;
-            }
+            var neighbour = Model.Map[Walker.MovingForwad[AngleInDegrees % 360] + Location];
+
+            if (!(neighbour is Wall || neighbour is Bot || neighbour is Bullet))
+                Command.Delta = Walker.MovingForwad[AngleInDegrees % 360];
         }
 
         public void GoLeft()
         {
-            GameObjects neighbour;
-            switch (AngleInDegrees % 360)
-            {
-                case 90:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy90.Left] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy90.Left];
-                    break;
-                case 180:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy180.Left] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy180.Left];
-                    break;
-                case 0:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy0.Left] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy0.Left];
-                    break;
-                case 270:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy270.Left] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy270.Left];
-                    break;
-            }
+            var neighbour = Model.Map[Walker.MovingLeft[AngleInDegrees % 360] + Location];
+
+            if (!(neighbour is Wall || neighbour is Bot || neighbour is Bullet))
+                Command.Delta = Walker.MovingLeft[AngleInDegrees % 360];
         }
 
         public void GoRight()
         {
-            GameObjects neighbour;
-            switch (AngleInDegrees % 360)
-            {
-                case 90:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy90.Right] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy90.Right];
-                    break;
-                case 180:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy180.Right] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy180.Right];
-                    break;
-                case 0:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy0.Right] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy0.Right];
-                    break;
-                case 270:
-                    neighbour = Model.Map[Playground.OfSets[(int)CSRotatedBy270.Right] + Location];
-                    if (!(neighbour is Wall || neighbour is Soldier || neighbour is Bullet))
-                        Command.Delta = Playground.OfSets[(int)CSRotatedBy270.Right];
-                    break;
-            }
-        }
+            var neighbour = Model.Map[Walker.MovingRight[AngleInDegrees % 360] + Location];
 
-        public void Shoot()
-        {
-            switch (AngleInDegrees % 360)
-            {
-                case 90:
-                    if (!(Model.Map[Playground.OfSets[(int)CSRotatedBy90.Forward] + Location] is Wall))
-                        Model.Map[Playground.OfSets[(int)CSRotatedBy90.Forward] + Location] = new Bullet(AngleInDegrees, Location);
-                    break;
-                case 180:
-                    if (!(Model.Map[Playground.OfSets[(int)CSRotatedBy180.Forward] + Location] is Wall))
-                        Model.Map[Playground.OfSets[(int)CSRotatedBy180.Forward] + Location] = new Bullet( AngleInDegrees, Location);
-                    break;
-                case 0:
-                    if (!(Model.Map[Playground.OfSets[(int)CSRotatedBy0.Forward] + Location] is Wall))
-                        Model.Map[Playground.OfSets[(int)CSRotatedBy0.Forward] + Location] = new Bullet(AngleInDegrees, Location);
-                    break;
-                case 270:
-                    if (!(Model.Map[Playground.OfSets[(int)CSRotatedBy270.Forward] + Location] is Wall))
-                        Model.Map[Playground.OfSets[(int)CSRotatedBy270.Forward] + Location] = new Bullet(AngleInDegrees, Location);
-                    break;
-            }
+            if (!(neighbour is Wall || neighbour is Bot || neighbour is Bullet))
+                Command.Delta = Walker.MovingRight[AngleInDegrees % 360];
         }
     }
 }

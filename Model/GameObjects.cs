@@ -18,5 +18,7 @@ namespace WindowsForm.Model
             AngleInDegrees = 90;
             DrawingPriority = 0;
         }
+
+        public void UpdateTheLocation(int x, int y) => Location = new Point(x, y);
     }
 }

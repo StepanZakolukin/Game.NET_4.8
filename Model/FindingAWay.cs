@@ -20,7 +20,7 @@ namespace WindowsForm.Model
 
                 if (startingPositions.Contains(point.Value)) yield return point;
 
-                foreach (var ofset in Playground.OfSets)
+                foreach (var ofset in Walker.OfSets)
                 {
                     var nextPoint = point.Value + ofset;
 

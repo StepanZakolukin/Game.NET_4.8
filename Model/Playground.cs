@@ -8,7 +8,6 @@ namespace WindowsForm.Model
         public GameObjects[,] Map;
         public readonly int Height;
         public readonly int Width;
-        public static Point[] OfSets = new Point[] { new Point(0, 1), new Point(0, -1), new Point(-1, 0), new Point(1, 0) };
 
         public Playground(string pathToTheFile = @"..\..\Model\WallMap.txt") 
         {

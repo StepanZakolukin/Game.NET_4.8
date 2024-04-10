@@ -6,16 +6,27 @@ namespace Controller
 {
     public class Controller
     {
-        public readonly Timer Timer;
+        private readonly Timer MainTimer;
         private readonly Model Model;
+        private readonly Timer BotManagementTimer;
+        private readonly Timer BotCreationTimer;
         public Controller(Model model) 
         {
             Model = model;
-            Timer = new Timer();
 
-            Timer.Tick += UpdateTheModel;
+            BotCreationTimer = new Timer();
+            BotCreationTimer.Interval = 10000;
+            BotCreationTimer.Tick += (object sender, EventArgs args) => Model.CreateABot();
+            BotCreationTimer.Start();
 
-            Timer.Start();
+            BotManagementTimer = new Timer();
+            BotManagementTimer.Interval = 500;
+            BotManagementTimer.Tick += (object sender, EventArgs args) => Model.SetTheBotsInMotion();
+            BotManagementTimer.Start();
+
+            MainTimer = new Timer();
+            MainTimer.Tick += UpdateTheModel;
+            MainTimer.Start();
         }
 
         public void MakeAMove(object sender, KeyEventArgs e)
@@ -30,10 +41,7 @@ namespace Controller
             }
         }
 
-        public void ToShoot(object sender, EventArgs e)
-        {
-            Model.Player.Shoot();
-        }
+        public void ToShoot(object sender, EventArgs e) => Model.Player.Shoot();
 
         public void RotateThePlayer(object sender, MouseEventArgs e)
         {
@@ -41,10 +49,6 @@ namespace Controller
             else if (e.Delta <= -120) Model.Player.TurnLeft();
         }
 
-        private void UpdateTheModel(object sender, EventArgs args)
-        {
-            Model.ExecuteTheCommandsOfTheHeroes();
-            Model.Bot.MakeAMove();
-        }
+        private void UpdateTheModel(object sender, EventArgs args) => Model.ExecuteTheCommandsOfTheHeroes();
     }
 }
