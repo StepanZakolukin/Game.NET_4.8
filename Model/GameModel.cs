@@ -24,8 +24,6 @@ namespace WindowsForm.Model
             for (var x = 0; x < Map.MapWidth; x++)
                 for (var y = 0; y < Map.MapHeight; y++)
                 {
-                    Map[x, y].AngleInDegrees += Map[x, y].Command.AngularDistance;
-
                     Animations.Add(new CreatureAnimation {
                             Command = Map[x, y].Command,
                             Creature = Map[x, y],
@@ -42,8 +40,8 @@ namespace WindowsForm.Model
                 for (var y = 0; y < Map.MapHeight; y++)
                 {
                     var creature = SelectWinnerCandidatePerLocation(creaturesPerLocation, x, y);
+                    if (creature is Soldier soldier) soldier.MoveIsCompleted();
                     creature.Location = new Point(x, y);
-                    if (creature is Soldier) creature.Command = new CreatureCommand();
                     Map[x, y] = creature;
                 }
         }

@@ -5,12 +5,10 @@
 		public CreatureCommand()
 		{
 			Delta = new Point(0, 0);
-			AngularDistance = 0;
 			TransformTo = null;
 		}
 
-		public Point Delta;
-		public int AngularDistance;
+        public Point Delta;
 		public GameObjects TransformTo;
 	}
 }

@@ -47,16 +47,19 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\Bot.cs" />
     <Compile Include="Model\GameObjects.cs" />
     <Compile Include="Model\CreatureAnimation.cs" />
     <Compile Include="Model\CreatureCommand.cs" />
     <Compile Include="Model\CSRotatedBy180.cs" />
     <Compile Include="Model\GameMap.cs" />
     <Compile Include="Model\Bullet.cs" />
+    <Compile Include="Model\PathFinder.cs" />
     <Compile Include="Model\Point.cs" />
     <Compile Include="Model\CSRotatedBy0.cs" />
     <Compile Include="Model\CSRotatedBy270.cs" />
     <Compile Include="Model\CSRotatedBy90.cs" />
+    <Compile Include="Model\SinglyLinkedList.cs" />
     <Compile Include="Model\Stone.cs" />
     <Compile Include="View\MyForm.cs">
       <SubType>Form</SubType>
