@@ -10,6 +10,10 @@ namespace WindowsForm.Model
         public List<Bot> ArmyOfBots;
         public static Playground Map { get; private set; }
         public static Player Player { get; private set; }
+        private int numberOfBots;
+        public int NumberOfActiveBots { get; set; }
+
+
         public Model(Playground map)
         {
             Map = map;
@@ -62,10 +66,17 @@ namespace WindowsForm.Model
             var location = FindAPositionToCreateABot();
             Map[location] = new Bot(location);
             ArmyOfBots.Add((Bot)Map[location]);
+            numberOfBots++;
         }
 
         public void SetTheBotsInMotion()
         {
+            ArmyOfBots = ArmyOfBots
+                .Where(bot => bot == Map[bot.Location])
+                .ToList();
+
+            NumberOfActiveBots = numberOfBots - ArmyOfBots.Count;
+
             foreach (var bot in ArmyOfBots)
                 bot.MakeAMove();
         }

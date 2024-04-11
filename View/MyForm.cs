@@ -7,34 +7,53 @@ namespace MainWindow
 {
     public partial class MyForm : Form
     {
-        public float ImageSize { get; private set; } 
-        public PointF InitialCoordinateOfTheMap { get; private set; }
-
+        private readonly Model Model;
+        private float ImageSize { get; set; }
+        private PointF InitialCoordinateOfTheMap { get; set; }
+        private RectangleF CoordinatesOfTheInscription;
+        private readonly Button PauseButton;
         public MyForm(Model model)
         {
-            InitializeComponent();
+            Model = model;
+            KeyPreview = true;
             DoubleBuffered = true;
             BackColor = Color.Black;
-            Size = new Size(1072, 699);
+            WindowState = FormWindowState.Maximized;
             Text = "Последний защитник Брестской Крепости";
 
+            PauseButton = new Button()
+            {
+                BackColor = Color.White,
+                Location = new System.Drawing.Point((int)InitialCoordinateOfTheMap.X, 0),
+                Size = new Size((int)ImageSize, (int)ImageSize),
+                BackgroundImage = Image.FromFile(@"..\..\Images\PauseButton.png"),
+                BackgroundImageLayout = ImageLayout.Zoom
+            };
+            Controls.Add(PauseButton);
+
             var controller = new Controller.Controller(model);
+            PauseButton.Click += controller.PutItOnPause;
             Click += controller.ToShoot;
             KeyDown += controller.MakeAMove;
             MouseWheel += controller.RotateThePlayer;
 
             Paint += DrawingTheModel;
+            Paint += DrawTheText;
+            Load += (sender, args) => OnSizeChanged(EventArgs.Empty);
+            SizeChanged += (object sender, EventArgs e) => UpdateFieldValues();
 
-            model.StateChanged += UpdateTheDisplay;
+            model.StateChanged += Invalidate;
+
+            InitializeComponent();
         }
 
-        private void UpdateTheDisplay()
+        void DrawTheText(object sender, PaintEventArgs e)
         {
-            UpdateFieldValues();
-            Invalidate();
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            e.Graphics.DrawString($"Уничтожено врагов: {Model.NumberOfActiveBots}", new Font("Arial", Math.Max(ImageSize / 2, 4), FontStyle.Bold), Brushes.White, CoordinatesOfTheInscription);
         }
 
-        private void DrawingTheModel(object sender, PaintEventArgs e)
+        void DrawingTheModel(object sender, PaintEventArgs e)
         {
             var stone = Image.FromFile(@"..\..\Images\камень.jpg");
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
@@ -56,7 +75,7 @@ namespace MainWindow
                 }
         }
 
-        private PointF[] RecalculateTheCoordinatesOnTheForm(System.Drawing.Point positionOnTheMap)
+        PointF[] RecalculateTheCoordinatesOnTheForm(System.Drawing.Point positionOnTheMap)
         { 
             return new PointF[] {
                 new PointF(positionOnTheMap.X * ImageSize + InitialCoordinateOfTheMap.X, positionOnTheMap.Y * ImageSize + InitialCoordinateOfTheMap.Y),
@@ -64,15 +83,20 @@ namespace MainWindow
                 new PointF(positionOnTheMap.X * ImageSize + InitialCoordinateOfTheMap.X, positionOnTheMap.Y * ImageSize + InitialCoordinateOfTheMap.Y + ImageSize) };
         }
 
-        private void UpdateFieldValues()
+        void UpdateFieldValues()
         {
-            ImageSize = Math.Min(Size.Height / 18, Size.Width / 32);
+            ImageSize = Math.Min(Size.Height / 20, Size.Width / 32);
 
             InitialCoordinateOfTheMap = new PointF((Size.Width - ImageSize * 32) / 2 - ImageSize / 4,
-                (Size.Height - ImageSize * 18) / 2 - ImageSize / 2);
+                (Size.Height - ImageSize * 20) / 2 - ImageSize / 2 + 1.5f * ImageSize);
+
+            CoordinatesOfTheInscription = new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize, 0), new SizeF(InitialCoordinateOfTheMap.X + ImageSize * 32, InitialCoordinateOfTheMap.Y));
+
+            PauseButton.Location = new System.Drawing.Point((int)InitialCoordinateOfTheMap.X, 0);
+            PauseButton.Size = new Size((int)ImageSize, (int)ImageSize);
         }
 
-        private PointF[] RotateAnArrayOfPoints(PointF[] points, double turn)
+        PointF[] RotateAnArrayOfPoints(PointF[] points, double turn)
         {
             var centre = new PointF(points[0].X + (points[1].X - points[0].X) / 2, points[0].Y + (points[2].Y - points[0].Y) / 2);
 
@@ -88,7 +112,7 @@ namespace MainWindow
             };
         }
 
-        private PointF RotateAPoint(PointF point, double angleInRadians)
+        PointF RotateAPoint(PointF point, double angleInRadians)
         {
             var d = Math.Sqrt(point.X * point.X + point.Y * point.Y);
             var angle = Math.Atan2(point.Y, point.X) + angleInRadians;
