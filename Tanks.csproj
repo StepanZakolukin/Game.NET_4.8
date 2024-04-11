@@ -50,7 +50,6 @@
     <Compile Include="Model\Bot.cs" />
     <Compile Include="Model\Characters.cs" />
     <Compile Include="Model\GameObjects.cs" />
-    <Compile Include="Model\CreatureCommand.cs" />
     <Compile Include="Model\Playground.cs" />
     <Compile Include="Model\Bullet.cs" />
     <Compile Include="Model\FindingAWay.cs" />
@@ -68,7 +67,7 @@
     <Compile Include="Controller\Controller.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Model\Soldier.cs" />
+    <Compile Include="Model\Player.cs" />
     <Compile Include="Model\Wall.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

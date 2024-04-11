@@ -23,7 +23,7 @@ namespace MainWindow
             KeyDown += controller.MakeAMove;
             MouseWheel += controller.RotateThePlayer;
 
-            Paint += DrawAModel;
+            Paint += DrawingTheModel;
 
             model.StateChanged += UpdateTheDisplay;
         }
@@ -34,7 +34,7 @@ namespace MainWindow
             Invalidate();
         }
 
-        private void DrawAModel(object sender, PaintEventArgs e)
+        private void DrawingTheModel(object sender, PaintEventArgs e)
         {
             var stone = Image.FromFile(@"..\..\Images\камень.jpg");
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;

@@ -7,13 +7,11 @@ namespace WindowsForm.Model
     {
         public Bot(Point location, string pathToTheFile = @"..\..\Images\солдат.png") : base(location, pathToTheFile)
         {
-            Priority = 80;
-            DrawingPriority = 1;
         }
 
         public void MakeAMove()
         {
-            if (!(Model.Map[Model.Player.Location] is Soldier)) return;
+            if (!(Model.Map[Model.Player.Location] is Player)) return;
             
             var distance = Location - Model.Player.Location;
 
@@ -63,7 +61,7 @@ namespace WindowsForm.Model
                 .ToHashSet())
                 .FirstOrDefault();
 
-            if (followingLocation != null) Command.Delta = followingLocation.Value - Location;
+            if (followingLocation != null) Delta = followingLocation.Value - Location;
         }
     }
 }

@@ -1,21 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-//берем максимальный элемент, те кторые в конфликте с ним доют отрицательный результат убираем, сортируем по приоритету отрисовки
+
 namespace WindowsForm.Model
 {
     public class Model
     {
         public event Action StateChanged;
         public List<Bot> ArmyOfBots;
-        public static event Action<int, int> CommandsAreExecuted;
         public static Playground Map { get; private set; }
-        public static Soldier Player { get; private set; }
+        public static Player Player { get; private set; }
         public Model(Playground map)
         {
             Map = map;
-            Map[30, 1] = new Soldier(90, new Point(30, 1));
-            Player = (Soldier)Map[30, 1];
+            Map[30, 1] = new Player(90, new Point(30, 1));
+            Player = (Player)Map[30, 1];
             ArmyOfBots = new List<Bot>();
         }
 
@@ -30,9 +29,8 @@ namespace WindowsForm.Model
             for (var x = 0; x < Map.Width; x++)
                 for (var y = 0; y < Map.Height; y++)
                 {
-                    var targetLogicalLocation = Map[x, y].Location + Map[x, y].Command.Delta;
-                    var nextCreature = Map[x, y].Command.TransformTo ?? Map[x, y];
-                    creatures[targetLogicalLocation.X, targetLogicalLocation.Y].Add(nextCreature);
+                    var targetLogicalLocation = Map[x, y].Location + Map[x, y].Delta;
+                    creatures[targetLogicalLocation.X, targetLogicalLocation.Y].Add(Map[x, y]);
                 }
 
             return creatures;

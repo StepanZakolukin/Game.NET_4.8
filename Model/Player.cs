@@ -1,12 +1,10 @@
 ﻿namespace WindowsForm.Model
 {
-    public class Soldier : Characters
+    public class Player : Characters
     {
-        public Soldier(int angleInDegrees, Point location, string pathToTheFile = @"..\..\Images\солдат.png") : base(location, pathToTheFile)
+        public Player(int angleInDegrees, Point location, string pathToTheFile = @"..\..\Images\солдат.png") : base(location, pathToTheFile)
         {
             AngleInDegrees = angleInDegrees;
-            DrawingPriority = 1;
-            Priority = 80;
         }
 
         public void TurnLeft() => AngleInDegrees += 270;
@@ -18,7 +16,7 @@
             var neighbour = Model.Map[Walker.MovingBack[AngleInDegrees % 360] + Location];
 
             if (!(neighbour is Wall || neighbour is Bot || neighbour is Bullet))
-                Command.Delta = Walker.MovingBack[AngleInDegrees % 360];
+                Delta = Walker.MovingBack[AngleInDegrees % 360];
         }
 
         public void GoForwad()
@@ -26,7 +24,7 @@
             var neighbour = Model.Map[Walker.MovingForwad[AngleInDegrees % 360] + Location];
 
             if (!(neighbour is Wall || neighbour is Bot || neighbour is Bullet))
-                Command.Delta = Walker.MovingForwad[AngleInDegrees % 360];
+                Delta = Walker.MovingForwad[AngleInDegrees % 360];
         }
 
         public void GoLeft()
@@ -34,7 +32,7 @@
             var neighbour = Model.Map[Walker.MovingLeft[AngleInDegrees % 360] + Location];
 
             if (!(neighbour is Wall || neighbour is Bot || neighbour is Bullet))
-                Command.Delta = Walker.MovingLeft[AngleInDegrees % 360];
+                Delta = Walker.MovingLeft[AngleInDegrees % 360];
         }
 
         public void GoRight()
@@ -42,7 +40,7 @@
             var neighbour = Model.Map[Walker.MovingRight[AngleInDegrees % 360] + Location];
 
             if (!(neighbour is Wall || neighbour is Bot || neighbour is Bullet))
-                Command.Delta = Walker.MovingRight[AngleInDegrees % 360];
+                Delta = Walker.MovingRight[AngleInDegrees % 360];
         }
     }
 }

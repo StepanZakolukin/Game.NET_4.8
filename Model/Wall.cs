@@ -4,7 +4,7 @@
     {
         public Wall(Point location, string pathToTheFile = @"..\..\Images\кирпич.jpg") : base(location, pathToTheFile)
         {
-            Priority = 200;
+            Priority = 3;
         }
     }
 }
