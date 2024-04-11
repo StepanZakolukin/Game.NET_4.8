@@ -6,7 +6,11 @@
         {
         }
 
-        public void CommandAreExecuted() => Command.Delta = new Point(0, 0);
+        public override void CommandAreExecuted(int x, int y)
+        {
+            Command.Delta = new Point(0, 0);
+            Location = new Point(x, y);
+        }
 
         public void Shoot()
         {

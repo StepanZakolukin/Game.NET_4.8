@@ -5,11 +5,11 @@ namespace WindowsForm.Model
     public class GameObjects
     {
         public int Priority;
+        public int DrawingPriority { get; set; }
         public readonly Image Picture;
         public int AngleInDegrees { get; set; }
         public Point Location { get; set; }
         public CreatureCommand Command { get; private set; }
-        public int DrawingPriority { get; set; }
         public GameObjects(Point location, string pathToTheFile)
         {
             Picture = Image.FromFile(pathToTheFile);
@@ -19,6 +19,11 @@ namespace WindowsForm.Model
             DrawingPriority = 0;
         }
 
-        public void UpdateTheLocation(int x, int y) => Location = new Point(x, y);
+        public virtual void CommandAreExecuted(int x, int y) => Location = new Point(x, y);
+
+        public virtual bool DeadInConflict(GameObjects conflictedObject)
+        {
+            return false;
+        }
     }
 }

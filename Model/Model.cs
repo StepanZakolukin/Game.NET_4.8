@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+//берем максимальный элемент, те кторые в конфликте с ним доют отрицательный результат убираем, сортируем по приоритету отрисовки
 namespace WindowsForm.Model
 {
     public class Model
@@ -46,8 +46,7 @@ namespace WindowsForm.Model
                 for (var y = 0; y < Map.Height; y++)
                 {
                     Map[x, y] = SelectWinnerCandidatePerLocation(creaturesPerLocation, x, y);
-                    Map[x, y].UpdateTheLocation(x, y);
-                    if (Map[x, y] is Characters characters) characters.CommandAreExecuted();
+                    Map[x, y].CommandAreExecuted(x, y);
                 }
 
             StateChanged();
