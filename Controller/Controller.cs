@@ -45,6 +45,7 @@ namespace Controller
                 case Keys.S: Model.Player.GoBack(); break;
                 case Keys.D: Model.Player.GoRight(); break;
                 case Keys.A: Model.Player.GoLeft(); break;
+                case Keys.Enter: PutItOnPause(sender, e); break;
                 default: break;
             }
         }
@@ -55,12 +56,13 @@ namespace Controller
             Model.Player.Shoot();
         }
 
-            public void RotateThePlayer(object sender, MouseEventArgs e)
+        public void RotateThePlayer(object sender, MouseEventArgs e)
         {
+            if (MainTimer.Enabled == false) return;
             if (e.Delta >= 120) Model.Player.TurnRight();
             else if (e.Delta <= -120) Model.Player.TurnLeft();
         }
 
-        private void UpdateTheModel(object sender, EventArgs args) => Model.ExecuteTheCommandsOfTheHeroes();
+        void UpdateTheModel(object sender, EventArgs args) => Model.ExecuteTheCommandsOfTheHeroes();
     }
 }
