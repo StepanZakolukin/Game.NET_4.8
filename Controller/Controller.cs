@@ -6,8 +6,8 @@ namespace Controller
 {
     public class Controller
     {
-        private readonly Timer MainTimer;
         private readonly Model Model;
+        private readonly Timer MainTimer;
         private readonly Timer BotManagementTimer;
         private readonly Timer BotCreationTimer;
         public Controller(Model model) 

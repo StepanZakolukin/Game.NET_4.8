@@ -14,6 +14,7 @@ namespace WindowsForm.Model
             var wallMap = File.ReadAllText(pathToTheFile).Split('\n')
                 .Select(st => st.Split('\t'))
                 .ToArray();
+
             Height = wallMap.Length - 1;
             Width = wallMap[0].Length;
             CreateMap(wallMap);

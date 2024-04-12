@@ -7,11 +7,11 @@ namespace WindowsForm.Model
     public class Model
     {
         public event Action StateChanged;
-        public List<Bot> ArmyOfBots;
+        public List<Bot> ArmyOfBots { get; private set; }
         public static Playground Map { get; private set; }
         public static Player Player { get; private set; }
         private int numberOfBots;
-        public int NumberOfActiveBots { get; set; }
+        public int NumberOfActiveBots { get; private set; }
 
 
         public Model(Playground map)
