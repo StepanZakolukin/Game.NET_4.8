@@ -13,12 +13,12 @@ namespace WindowsForm.Model
         private int numberOfBots;
         public int NumberOfActiveBots { get; private set; }
 
-
         public Model(Playground map)
         {
             Map = map;
-            Map[30, 1] = new Player(90, new Point(30, 1));
-            Player = (Player)Map[30, 1];
+            var playerLocation = FindAPositionToCreateAnOject();
+            Map[playerLocation] = new Player(90, playerLocation);
+            Player = (Player)Map[playerLocation];
             ArmyOfBots = new List<Bot>();
         }
 
@@ -63,7 +63,7 @@ namespace WindowsForm.Model
 
         public void CreateABot()
         {
-            var location = FindAPositionToCreateABot();
+            var location = FindAPositionToCreateAnOject();
             Map[location] = new Bot(location);
             ArmyOfBots.Add((Bot)Map[location]);
             numberOfBots++;
@@ -81,7 +81,7 @@ namespace WindowsForm.Model
                 bot.MakeAMove();
         }
 
-        private Point FindAPositionToCreateABot()
+        private Point FindAPositionToCreateAnOject()
         {
             var random = new Random();
             (var x, var y) = (int.MaxValue, int.MaxValue);
