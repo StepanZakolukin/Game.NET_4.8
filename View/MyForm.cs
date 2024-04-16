@@ -24,7 +24,7 @@ namespace MainWindow
             PauseButton = new Button()
             {
                 BackColor = Color.White,
-                Location = new System.Drawing.Point((int)InitialCoordinateOfTheMap.X, 0),
+                Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + 31 * ImageSize), 0),
                 Size = new Size((int)ImageSize, (int)ImageSize),
                 BackgroundImage = Image.FromFile(@"..\..\Images\PauseButton.png"),
                 BackgroundImageLayout = ImageLayout.Zoom
@@ -50,7 +50,7 @@ namespace MainWindow
         void DrawTheText(object sender, PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-            e.Graphics.DrawString($"Уничтожено врагов: {Model.NumberOfActiveBots}", new Font("Arial", Math.Max(ImageSize / 2, 4), FontStyle.Bold), Brushes.White, CoordinatesOfTheInscription);
+            e.Graphics.DrawString($"Уничтожено врагов: {Model.NumberOfActiveBots}", new Font("Arial", Math.Max(ImageSize / 2, 1), FontStyle.Bold), Brushes.White, CoordinatesOfTheInscription);
         }
 
         void DrawingTheModel(object sender, PaintEventArgs e)
@@ -85,14 +85,14 @@ namespace MainWindow
 
         void UpdateFieldValues()
         {
-            ImageSize = Math.Min(Size.Height / 20, Size.Width / 32);
+            ImageSize = Math.Min((ClientSize.Height) / 20, (ClientSize.Width) / 32);
 
-            InitialCoordinateOfTheMap = new PointF((Size.Width - ImageSize * 32) / 2 - ImageSize / 4,
-                (Size.Height - ImageSize * 20) / 2 - ImageSize / 2 + 1.5f * ImageSize);
+            InitialCoordinateOfTheMap = new PointF((ClientSize.Width - ImageSize * 32) / 2,
+                (ClientSize.Height - ImageSize * 18) / 2);
 
-            CoordinatesOfTheInscription = new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize, 0), new SizeF(InitialCoordinateOfTheMap.X + ImageSize * 32, InitialCoordinateOfTheMap.Y));
+            CoordinatesOfTheInscription = new RectangleF(new PointF(InitialCoordinateOfTheMap.X, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f), new SizeF(InitialCoordinateOfTheMap.X + ImageSize * 31, ImageSize));
 
-            PauseButton.Location = new System.Drawing.Point((int)InitialCoordinateOfTheMap.X, 0);
+            PauseButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 31), (int)(InitialCoordinateOfTheMap.Y - ImageSize));
             PauseButton.Size = new Size((int)ImageSize, (int)ImageSize);
         }
 
