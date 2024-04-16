@@ -18,6 +18,7 @@ namespace MainWindow
             KeyPreview = true;
             DoubleBuffered = true;
             BackColor = Color.Black;
+            Size = new Size() { Height = 450, Width = 800 };
             WindowState = FormWindowState.Maximized;
             Text = "Последний защитник Брестской Крепости";
 
@@ -85,14 +86,17 @@ namespace MainWindow
 
         void UpdateFieldValues()
         {
-            ImageSize = Math.Min((ClientSize.Height) / 20, (ClientSize.Width) / 32);
+            ImageSize = Math.Min(ClientSize.Height / (Model.Map.Height + 1), ClientSize.Width / Model.Map.Width);
 
-            InitialCoordinateOfTheMap = new PointF((ClientSize.Width - ImageSize * 32) / 2,
-                (ClientSize.Height - ImageSize * 18) / 2);
+            InitialCoordinateOfTheMap = new PointF((ClientSize.Width - ImageSize * Model.Map.Width) / 2,
+                (ClientSize.Height - ImageSize * (Model.Map.Height + 1)) / 2 + ImageSize);
 
-            CoordinatesOfTheInscription = new RectangleF(new PointF(InitialCoordinateOfTheMap.X, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f), new SizeF(InitialCoordinateOfTheMap.X + ImageSize * 31, ImageSize));
+            CoordinatesOfTheInscription = new RectangleF(
+                new PointF(InitialCoordinateOfTheMap.X, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f),
+                new SizeF(InitialCoordinateOfTheMap.X + ImageSize * (Model.Map.Width - 1), ImageSize));
 
-            PauseButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 31), (int)(InitialCoordinateOfTheMap.Y - ImageSize));
+            PauseButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * (Model.Map.Width - 1)),
+                (int)(InitialCoordinateOfTheMap.Y - ImageSize));
             PauseButton.Size = new Size((int)ImageSize, (int)ImageSize);
         }
 
