@@ -12,10 +12,22 @@ namespace WindowsForm.Model
         public void MakeAMove()
         {
             if (!(Model.Map[Model.Player.Location] is Player)) return;
-            
+
+            TurnToThePlayerAndShoot();
+
+            var followingLocation = FindingAWay.FindAWay(Model.Player.Location, Walker.OfSets
+                .Select(ofset => Location + ofset)
+                .ToHashSet())
+                .FirstOrDefault();
+
+            if (followingLocation != null) Delta = followingLocation.Value - Location;
+        }
+
+        void TurnToThePlayerAndShoot()
+        {
             var distance = Location - Model.Player.Location;
 
-            if (distance.Y < 0 && distance.X == 0 && Enumerable.Range(Location.Y + 1, Math.Abs(distance.Y) - 1).All(y => Model.Map[Location.X, y] is Stone))
+            if (distance.Y < 0 && distance.X == 0 && ChecTheExpediencyOfTheShot(Location.Y + 1, Math.Abs(distance.Y) - 1))
             {
                 switch (AngleInDegrees % 360)
                 {
@@ -25,7 +37,7 @@ namespace WindowsForm.Model
                 }
                 Shoot(); return;
             }
-            else if (distance.Y > 0 && distance.X == 0 && Enumerable.Range(Model.Player.Location.Y + 1, distance.Y - 1).All(y => Model.Map[Location.X, y] is Stone))
+            else if (distance.Y > 0 && distance.X == 0 && ChecTheExpediencyOfTheShot(Model.Player.Location.Y + 1, distance.Y - 1))
             {
                 switch (AngleInDegrees % 360)
                 {
@@ -35,7 +47,7 @@ namespace WindowsForm.Model
                 }
                 Shoot(); return;
             }
-            else if (distance.X < 0 && distance.Y == 0 && Enumerable.Range(Location.X + 1, Math.Abs(distance.X) - 1).All(x => Model.Map[x, Location.Y] is Stone))
+            else if (distance.X < 0 && distance.Y == 0 && ChecTheExpediencyOfTheShot(Location.X + 1, Math.Abs(distance.X) - 1))
             {
                 switch (AngleInDegrees % 360)
                 {
@@ -45,7 +57,7 @@ namespace WindowsForm.Model
                 }
                 Shoot(); return;
             }
-            else if (distance.X > 0 && distance.Y == 0 && Enumerable.Range(Model.Player.Location.X + 1, distance.X - 1).All(x => Model.Map[x, Location.Y] is Stone))
+            else if (distance.X > 0 && distance.Y == 0 && ChecTheExpediencyOfTheShot(Model.Player.Location.X + 1, distance.X - 1))
             {
                 switch (AngleInDegrees % 360)
                 {
@@ -55,13 +67,9 @@ namespace WindowsForm.Model
                 }
                 Shoot(); return;
             }
-
-            var followingLocation = FindingAWay.FindAWay(Model.Player.Location, Walker.OfSets
-                .Select(ofset => Location + ofset)
-                .ToHashSet())
-                .FirstOrDefault();
-
-            if (followingLocation != null) Delta = followingLocation.Value - Location;
         }
+
+        bool ChecTheExpediencyOfTheShot(int start, int numberOfIterations)
+            => Enumerable.Range(start, numberOfIterations).All(y => Model.Map[Location.X, y] is Stone);
     }
 }
