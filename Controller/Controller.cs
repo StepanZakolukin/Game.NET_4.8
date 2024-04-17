@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MainWindow;
+using System;
 using System.Windows.Forms;
 using WindowsForm.Model;
 
@@ -7,12 +8,31 @@ namespace Controller
     public class Controller
     {
         private readonly Model Model;
-        private readonly Timer MainTimer;
-        private readonly Timer BotManagementTimer;
-        private readonly Timer BotCreationTimer;
+        private Timer MainTimer;
+        private Timer BotManagementTimer;
+        private Timer BotCreationTimer;
+        public Timer Timer { get; private set; }
         public Controller(Model model) 
         {
             Model = model;
+        }
+
+        public void TimerMenuStop()
+        {
+            Timer.Dispose();
+        }
+
+        public void TimerMenuStart()
+        {
+            Timer = new Timer();
+            Timer.Start();
+        }
+
+        public void ActivateTimers()
+        {
+            MainTimer = new Timer();
+            MainTimer.Tick += UpdateTheModel;
+            MainTimer.Start();
 
             BotCreationTimer = new Timer();
             BotCreationTimer.Interval = 8000;
@@ -23,10 +43,17 @@ namespace Controller
             BotManagementTimer.Interval = 600;
             BotManagementTimer.Tick += (object sender, EventArgs args) => Model.SetTheBotsInMotion();
             BotManagementTimer.Start();
+        }
 
-            MainTimer = new Timer();
-            MainTimer.Tick += UpdateTheModel;
-            MainTimer.Start();
+        public void StopTimers()
+        {
+            MainTimer.Stop();
+            BotCreationTimer.Stop();
+            BotManagementTimer.Stop();
+            
+            MainTimer.Dispose();
+            BotCreationTimer.Dispose();
+            BotManagementTimer.Dispose();
         }
 
         public void PutItOnPause(object sender, EventArgs e)

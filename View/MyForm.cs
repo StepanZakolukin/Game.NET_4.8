@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using WindowsForm.Model;
 
@@ -8,50 +10,145 @@ namespace MainWindow
     public partial class MyForm : Form
     {
         private readonly Model Model;
+        private readonly Controller.Controller Controller;
         private float ImageSize { get; set; }
         private PointF InitialCoordinateOfTheMap { get; set; }
         private RectangleF CoordinatesOfTheInscription;
-        private readonly Button PauseButton;
+        private Button PauseButton { get; set; }
+        private Button StartButton { get; set; }
         public MyForm(Model model)
         {
             Model = model;
+            Controller = new Controller.Controller(model);
+
             KeyPreview = true;
             DoubleBuffered = true;
+
             BackColor = Color.Black;
             Size = new Size() { Height = 450, Width = 800 };
             WindowState = FormWindowState.Maximized;
-            Text = "Последний защитник Брестской Крепости";
+            Text = "Защитник Брестской Крепости";
 
+            OpenTheMainMenu();
+
+            Load += (sender, args) => OnSizeChanged(EventArgs.Empty);
+            InitializeComponent();
+        }
+
+        public void StartGame(object sender, EventArgs e)
+        {
+            CloseTheMainMenu();
+            Controller.ActivateTimers();
+            StartTheGame();
+        }
+
+        void OpenTheMainMenu()
+        {
+            BackgroundImage = Image.FromFile(@"..\..\Images\стена4.jpg");
+            BackgroundImageLayout = ImageLayout.Zoom;
+
+            //Paint += DrawTheMainMenu;
+
+            StartButton = new Button()
+            {
+                BackgroundImage = Image.FromFile(@"..\..\Images\кнопка.png"),
+                BackgroundImageLayout = ImageLayout.Zoom,
+                BackColor = Color.FromArgb(110, 59, 13)
+            };
+            Controls.Add(StartButton);
+
+            Controller.TimerMenuStart();
+            StartButton.Click += StartGame;
+            SizeChanged += UpdateTheFieldsForTheMenu;
+            Controller.Timer.Tick += UpdateTheMenuRendering;
+        }
+
+        void UpdateTheMenuRendering(object sender, EventArgs e) => Invalidate();
+
+        public void CloseTheMainMenu()
+        {
+            Controls.Clear();
+            Controller.TimerMenuStop();
+            SizeChanged -= UpdateTheFieldsForTheMenu;
+            StartButton.Click -= StartGame;
+            Paint -= DrawTheMainMenu;
+            Controller.Timer.Tick -= UpdateTheMenuRendering;
+            BackgroundImage = null;
+        }
+
+        void DrawTheMainMenu(object sender, PaintEventArgs e)
+        {
+            //var wallMap = File.ReadAllText(@"..\..\View\Screensaver.txt").Split('\n')
+            //    .Select(st => st.Split('\t'))
+            //    .ToArray();
+            //var wall = Image.FromFile(@"..\..\Images\кирпич.jpg");
+            //var stone = Image.FromFile(@"..\..\Images\камень.jpg");
+
+            //for (var y = 0; y < wallMap.Length; y++)
+            //    for (var x = 0; x < wallMap[y].Length; x++)
+            //    {
+            //        if (wallMap[y][x] == "0")e.Graphics.DrawImage(stone, RecalculateTheCoordinatesOnTheForm(new System.Drawing.Point(x, y)));
+            //        else e.Graphics.DrawImage(wall, RecalculateTheCoordinatesOnTheForm(new System.Drawing.Point(x, y)));
+            //    }
+
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            e.Graphics.DrawString("Защитник Брестской Крепости", new Font("Arial", Math.Max(ImageSize / 6 * 5, 1), FontStyle.Bold), Brushes.Black, new RectangleF(new PointF(InitialCoordinateOfTheMap.X + 1 * ImageSize, InitialCoordinateOfTheMap.Y + 3 * ImageSize),
+                new Size((int)(14 * ImageSize), (int)(3 * ImageSize))), new StringFormat() { Alignment = StringAlignment.Center });
+        }
+
+        void UpdateTheFieldsForTheMenu(object sender, EventArgs e)
+        {
+            ImageSize = Math.Min(ClientSize.Height / 18, ClientSize.Width / 16);
+
+            InitialCoordinateOfTheMap = new PointF((ClientSize.Width - ImageSize * 16) / 2, (ClientSize.Height - ImageSize * 18) / 2);
+
+            StartButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 4), (int)(InitialCoordinateOfTheMap.Y + ImageSize * 12));
+            StartButton.Size = new Size() { Width = (int)(8 * ImageSize), Height = (int)(ImageSize * 2) };
+        }
+
+        void DisableGameManagementAndRendering()
+        {
+            Controls.Clear();
+
+            PauseButton.Click -= Controller.PutItOnPause;
+            Click -= Controller.ToShoot;
+            KeyDown -= Controller.MakeAMove;
+            MouseWheel -= Controller.RotateThePlayer;
+            Paint -= DrawingTheModel;
+            Paint -= WithdrawTheGameScore;
+            SizeChanged -= UpdateFieldValues;
+            Model.StateChanged -= Invalidate;
+
+            Controller.StopTimers();
+        }
+
+        public void StartTheGame()
+        {
             PauseButton = new Button()
             {
                 BackColor = Color.White,
-                Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + 31 * ImageSize), 0),
-                Size = new Size((int)ImageSize, (int)ImageSize),
                 BackgroundImage = Image.FromFile(@"..\..\Images\PauseButton.png"),
                 BackgroundImageLayout = ImageLayout.Zoom
             };
             Controls.Add(PauseButton);
 
-            var controller = new Controller.Controller(model);
-            PauseButton.Click += controller.PutItOnPause;
-            Click += controller.ToShoot;
-            KeyDown += controller.MakeAMove;
-            MouseWheel += controller.RotateThePlayer;
-
             Paint += DrawingTheModel;
-            Paint += DrawTheText;
-            Load += (sender, args) => OnSizeChanged(EventArgs.Empty);
-            SizeChanged += (object sender, EventArgs e) => UpdateFieldValues();
+            Paint += WithdrawTheGameScore;
+            Model.StateChanged += Invalidate;
+            UpdateFieldValues("", new EventArgs());
 
-            model.StateChanged += Invalidate;
+            SizeChanged += UpdateFieldValues;
 
-            InitializeComponent();
+            PauseButton.Click += Controller.PutItOnPause;
+            Click += Controller.ToShoot;
+            KeyDown += Controller.MakeAMove;
+            MouseWheel += Controller.RotateThePlayer;
         }
 
-        void DrawTheText(object sender, PaintEventArgs e)
+        void WithdrawTheGameScore(object sender, PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-            e.Graphics.DrawString($"Уничтожено врагов: {Model.NumberOfActiveBots}", new Font("Arial", Math.Max(ImageSize / 2, 1), FontStyle.Bold), Brushes.White, CoordinatesOfTheInscription);
+            e.Graphics.DrawString($"Счёт: {Model.NumberOfActiveBots}", new Font("Arial", Math.Max(ImageSize / 2, 1), FontStyle.Bold), Brushes.White, CoordinatesOfTheInscription);
         }
 
         void DrawingTheModel(object sender, PaintEventArgs e)
@@ -84,7 +181,7 @@ namespace MainWindow
                 new PointF(positionOnTheMap.X * ImageSize + InitialCoordinateOfTheMap.X, positionOnTheMap.Y * ImageSize + InitialCoordinateOfTheMap.Y + ImageSize) };
         }
 
-        void UpdateFieldValues()
+        void UpdateFieldValues(object sender, EventArgs e)
         {
             ImageSize = Math.Min(ClientSize.Height / (Model.Map.Height + 1), ClientSize.Width / Model.Map.Width);
 

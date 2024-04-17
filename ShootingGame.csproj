@@ -47,6 +47,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MainMenu.cs" />
     <Compile Include="Model\Bot.cs" />
     <Compile Include="Model\Characters.cs" />
     <Compile Include="Model\GameObjects.cs" />
@@ -101,6 +102,7 @@
     <Content Include="Images\пуля.png" />
     <Content Include="Images\солдат.png" />
     <Content Include="Model\WallMap.txt" />
+    <Content Include="View\Screensaver.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
