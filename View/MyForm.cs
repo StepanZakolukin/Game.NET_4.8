@@ -1,26 +1,24 @@
 ﻿using System;
 using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Windows.Forms;
 using WindowsForm.Model;
+using WindowsForm.Controller;
 
 namespace MainWindow
 {
     public partial class MyForm : Form
     {
-        private readonly Model Model;
-        private readonly Controller.Controller Controller;
+        private GameModel Model { get; set; }
+        private Controller Controller;
         private float ImageSize { get; set; }
         private PointF InitialCoordinateOfTheMap { get; set; }
         private RectangleF CoordinatesOfTheInscription;
-        private Button PauseButton { get; set; }
+        public static Button PauseButton { get; private set; }
+        private static Image[] PauseImages { get; set; }
         private Button StartButton { get; set; }
-        public MyForm(Model model)
+        public MyForm(GameModel model)
         {
             Model = model;
-            Controller = new Controller.Controller(model);
-
             KeyPreview = true;
             DoubleBuffered = true;
 
@@ -29,17 +27,20 @@ namespace MainWindow
             WindowState = FormWindowState.Maximized;
             Text = "Защитник Брестской Крепости";
 
+            PauseImages = new[] { Image.FromFile(@"..\..\Images\PauseButton.png"), Image.FromFile(@"..\..\Images\PauseButton1.png") };
+            SizeChanged += UpdateFieldValues;
+
             OpenTheMainMenu();
 
             Load += (sender, args) => OnSizeChanged(EventArgs.Empty);
             InitializeComponent();
         }
 
-        public void StartGame(object sender, EventArgs e)
+        public void StartTheGame(object sender, EventArgs e)
         {
             CloseTheMainMenu();
+            OpenTheGame();
             Controller.ActivateTimers();
-            StartTheGame();
         }
 
         void OpenTheMainMenu()
@@ -47,62 +48,34 @@ namespace MainWindow
             BackgroundImage = Image.FromFile(@"..\..\Images\стена4.jpg");
             BackgroundImageLayout = ImageLayout.Zoom;
 
-            //Paint += DrawTheMainMenu;
-
             StartButton = new Button()
             {
                 BackgroundImage = Image.FromFile(@"..\..\Images\кнопка.png"),
                 BackgroundImageLayout = ImageLayout.Zoom,
-                BackColor = Color.FromArgb(110, 59, 13)
+                BackColor = Color.FromArgb(120, 30, 18)
             };
             Controls.Add(StartButton);
 
-            Controller.TimerMenuStart();
-            StartButton.Click += StartGame;
+            UpdateTheFieldsForTheMenu("", new EventArgs());
+
+            StartButton.Click += StartTheGame;
             SizeChanged += UpdateTheFieldsForTheMenu;
-            Controller.Timer.Tick += UpdateTheMenuRendering;
         }
 
-        void UpdateTheMenuRendering(object sender, EventArgs e) => Invalidate();
+        public static void ChangeThePausePicture() => 
+            PauseButton.BackgroundImage = PauseButton.BackgroundImage == PauseImages[(int)Pause.ToPut] ? PauseImages[(int)Pause.Remove] : PauseImages[(int)Pause.ToPut];
 
         public void CloseTheMainMenu()
         {
-            Controls.Clear();
-            Controller.TimerMenuStop();
+            Controls.Clear();;
             SizeChanged -= UpdateTheFieldsForTheMenu;
-            StartButton.Click -= StartGame;
-            Paint -= DrawTheMainMenu;
-            Controller.Timer.Tick -= UpdateTheMenuRendering;
+            StartButton.Click -= StartTheGame;
             BackgroundImage = null;
-        }
-
-        void DrawTheMainMenu(object sender, PaintEventArgs e)
-        {
-            //var wallMap = File.ReadAllText(@"..\..\View\Screensaver.txt").Split('\n')
-            //    .Select(st => st.Split('\t'))
-            //    .ToArray();
-            //var wall = Image.FromFile(@"..\..\Images\кирпич.jpg");
-            //var stone = Image.FromFile(@"..\..\Images\камень.jpg");
-
-            //for (var y = 0; y < wallMap.Length; y++)
-            //    for (var x = 0; x < wallMap[y].Length; x++)
-            //    {
-            //        if (wallMap[y][x] == "0")e.Graphics.DrawImage(stone, RecalculateTheCoordinatesOnTheForm(new System.Drawing.Point(x, y)));
-            //        else e.Graphics.DrawImage(wall, RecalculateTheCoordinatesOnTheForm(new System.Drawing.Point(x, y)));
-            //    }
-
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-            e.Graphics.DrawString("Защитник Брестской Крепости", new Font("Arial", Math.Max(ImageSize / 6 * 5, 1), FontStyle.Bold), Brushes.Black, new RectangleF(new PointF(InitialCoordinateOfTheMap.X + 1 * ImageSize, InitialCoordinateOfTheMap.Y + 3 * ImageSize),
-                new Size((int)(14 * ImageSize), (int)(3 * ImageSize))), new StringFormat() { Alignment = StringAlignment.Center });
         }
 
         void UpdateTheFieldsForTheMenu(object sender, EventArgs e)
         {
-            ImageSize = Math.Min(ClientSize.Height / 18, ClientSize.Width / 16);
-
-            InitialCoordinateOfTheMap = new PointF((ClientSize.Width - ImageSize * 16) / 2, (ClientSize.Height - ImageSize * 18) / 2);
-
-            StartButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 4), (int)(InitialCoordinateOfTheMap.Y + ImageSize * 12));
+            StartButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 12), (int)(InitialCoordinateOfTheMap.Y + ImageSize * 12));
             StartButton.Size = new Size() { Width = (int)(8 * ImageSize), Height = (int)(ImageSize * 2) };
         }
 
@@ -116,28 +89,36 @@ namespace MainWindow
             MouseWheel -= Controller.RotateThePlayer;
             Paint -= DrawingTheModel;
             Paint -= WithdrawTheGameScore;
-            SizeChanged -= UpdateFieldValues;
+            SizeChanged -= RecalculateTheValuesOfTheGameButtons;
             Model.StateChanged -= Invalidate;
+            Model.TheGameIsOver -= DisableGameManagementAndRendering;
+            Model.TheGameIsOver -= OpenTheMainMenu;
 
             Controller.StopTimers();
         }
 
-        public void StartTheGame()
+        public void OpenTheGame()
         {
+            Model = new GameModel(new Playground());
+            Controller = new Controller(Model);
+            Model.StateChanged += Invalidate;
+            Model.TheGameIsOver += DisableGameManagementAndRendering;
+            Model.TheGameIsOver += OpenTheMainMenu;
+
             PauseButton = new Button()
             {
                 BackColor = Color.White,
-                BackgroundImage = Image.FromFile(@"..\..\Images\PauseButton.png"),
+                BackgroundImage = PauseImages[(int)Pause.ToPut],
                 BackgroundImageLayout = ImageLayout.Zoom
             };
+
             Controls.Add(PauseButton);
 
             Paint += DrawingTheModel;
             Paint += WithdrawTheGameScore;
-            Model.StateChanged += Invalidate;
-            UpdateFieldValues("", new EventArgs());
-
-            SizeChanged += UpdateFieldValues;
+            
+            RecalculateTheValuesOfTheGameButtons("", new EventArgs());
+            SizeChanged += RecalculateTheValuesOfTheGameButtons;
 
             PauseButton.Click += Controller.PutItOnPause;
             Click += Controller.ToShoot;
@@ -173,12 +154,11 @@ namespace MainWindow
                 }
         }
 
-        PointF[] RecalculateTheCoordinatesOnTheForm(System.Drawing.Point positionOnTheMap)
-        { 
-            return new PointF[] {
-                new PointF(positionOnTheMap.X * ImageSize + InitialCoordinateOfTheMap.X, positionOnTheMap.Y * ImageSize + InitialCoordinateOfTheMap.Y),
-                new PointF(positionOnTheMap.X * ImageSize + InitialCoordinateOfTheMap.X + ImageSize, positionOnTheMap.Y * ImageSize + InitialCoordinateOfTheMap.Y),
-                new PointF(positionOnTheMap.X * ImageSize + InitialCoordinateOfTheMap.X, positionOnTheMap.Y * ImageSize + InitialCoordinateOfTheMap.Y + ImageSize) };
+        void RecalculateTheValuesOfTheGameButtons(object sender, EventArgs e)
+        {
+            PauseButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * (Model.Map.Width - 1)),
+                (int)(InitialCoordinateOfTheMap.Y - ImageSize));
+            PauseButton.Size = new Size((int)ImageSize, (int)ImageSize);
         }
 
         void UpdateFieldValues(object sender, EventArgs e)
@@ -191,10 +171,14 @@ namespace MainWindow
             CoordinatesOfTheInscription = new RectangleF(
                 new PointF(InitialCoordinateOfTheMap.X, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f),
                 new SizeF(InitialCoordinateOfTheMap.X + ImageSize * (Model.Map.Width - 1), ImageSize));
+        }
 
-            PauseButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * (Model.Map.Width - 1)),
-                (int)(InitialCoordinateOfTheMap.Y - ImageSize));
-            PauseButton.Size = new Size((int)ImageSize, (int)ImageSize);
+        PointF[] RecalculateTheCoordinatesOnTheForm(System.Drawing.Point positionOnTheMap)
+        { 
+            return new PointF[] {
+                new PointF(positionOnTheMap.X * ImageSize + InitialCoordinateOfTheMap.X, positionOnTheMap.Y * ImageSize + InitialCoordinateOfTheMap.Y),
+                new PointF(positionOnTheMap.X * ImageSize + InitialCoordinateOfTheMap.X + ImageSize, positionOnTheMap.Y * ImageSize + InitialCoordinateOfTheMap.Y),
+                new PointF(positionOnTheMap.X * ImageSize + InitialCoordinateOfTheMap.X, positionOnTheMap.Y * ImageSize + InitialCoordinateOfTheMap.Y + ImageSize) };
         }
 
         PointF[] RotateAnArrayOfPoints(PointF[] points, double turn)

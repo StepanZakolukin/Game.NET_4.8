@@ -11,33 +11,33 @@
 
         public void TurnRight() => AngleInDegrees += 90;
 
-        public void GoBack()
+        public void GoBack(GameModel model)
         {
-            var neighbour = Model.Map[Walker.MovingBack[AngleInDegrees % 360] + Location];
+            var neighbour = model.Map[Walker.MovingBack[AngleInDegrees % 360] + Location];
 
             if (!(neighbour is Wall || neighbour is Bot || neighbour is Bullet))
                 Delta = Walker.MovingBack[AngleInDegrees % 360];
         }
 
-        public void GoForwad()
+        public void GoForwad(GameModel model)
         {
-            var neighbour = Model.Map[Walker.MovingForwad[AngleInDegrees % 360] + Location];
+            var neighbour = model.Map[Walker.MovingForwad[AngleInDegrees % 360] + Location];
 
             if (!(neighbour is Wall || neighbour is Bot || neighbour is Bullet))
                 Delta = Walker.MovingForwad[AngleInDegrees % 360];
         }
 
-        public void GoLeft()
+        public void GoLeft(GameModel model)
         {
-            var neighbour = Model.Map[Walker.MovingLeft[AngleInDegrees % 360] + Location];
+            var neighbour = model.Map[Walker.MovingLeft[AngleInDegrees % 360] + Location];
 
             if (!(neighbour is Wall || neighbour is Bot || neighbour is Bullet))
                 Delta = Walker.MovingLeft[AngleInDegrees % 360];
         }
 
-        public void GoRight()
+        public void GoRight(GameModel model)
         {
-            var neighbour = Model.Map[Walker.MovingRight[AngleInDegrees % 360] + Location];
+            var neighbour = model.Map[Walker.MovingRight[AngleInDegrees % 360] + Location];
 
             if (!(neighbour is Wall || neighbour is Bot || neighbour is Bullet))
                 Delta = Walker.MovingRight[AngleInDegrees % 360];

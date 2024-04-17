@@ -4,7 +4,7 @@ namespace WindowsForm.Model
 {
     public static class FindingAWay
     {
-        public static IEnumerable<SinglyLinkedList<Point>> FindAWay(Point finish, HashSet<Point> startingPositions)
+        public static IEnumerable<SinglyLinkedList<Point>> FindAWay(Playground map, Point finish, HashSet<Point> startingPositions)
         {
             var queue = new Queue<SinglyLinkedList<Point>>();
             queue.Enqueue(new SinglyLinkedList<Point>(finish));
@@ -14,8 +14,8 @@ namespace WindowsForm.Model
             {
                 var point = queue.Dequeue();
 
-                if (!Model.Map.InBounds(point.Value) || Model.Map[point.Value] is Wall
-                    || Model.Map[point.Value] is Bullet || Model.Map[point.Value] is Bot)
+                if (!map.InBounds(point.Value) || map[point.Value] is Wall
+                    || map[point.Value] is Bullet || map[point.Value] is Bot)
                     continue;
 
                 if (startingPositions.Contains(point.Value)) yield return point;

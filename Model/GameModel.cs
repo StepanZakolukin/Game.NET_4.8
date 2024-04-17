@@ -4,16 +4,17 @@ using System.Linq;
 
 namespace WindowsForm.Model
 {
-    public class Model
+    public class GameModel
     {
         public event Action StateChanged;
+        public event Action TheGameIsOver;
         public List<Bot> ArmyOfBots { get; private set; }
-        public static Playground Map { get; private set; }
-        public static Player Player { get; private set; }
+        public Playground Map { get; private set; }
+        public Player Player { get; private set; }
         private int numberOfBots;
         public int NumberOfActiveBots { get; private set; }
 
-        public Model(Playground map)
+        public GameModel(Playground map)
         {
             Map = map;
             var playerLocation = FindAPositionToCreateAnOject();
@@ -52,6 +53,7 @@ namespace WindowsForm.Model
                 }
 
             StateChanged();
+            if (Player != Map[Player.Location]) TheGameIsOver();
         }
 
         private static GameObjects SelectWinnerCandidatePerLocation(List<GameObjects>[,] creatures, int x, int y)
@@ -69,7 +71,7 @@ namespace WindowsForm.Model
             numberOfBots++;
         }
 
-        public void SetTheBotsInMotion()
+        public void SetTheBotsInMotion(GameModel model)
         {
             ArmyOfBots = ArmyOfBots
                 .Where(bot => bot == Map[bot.Location])
@@ -78,7 +80,7 @@ namespace WindowsForm.Model
             NumberOfActiveBots = numberOfBots - ArmyOfBots.Count;
 
             foreach (var bot in ArmyOfBots)
-                bot.MakeAMove();
+                bot.MakeAMove(model);
         }
 
         private Point FindAPositionToCreateAnOject()

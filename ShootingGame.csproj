@@ -58,13 +58,14 @@
     <Compile Include="Model\SinglyLinkedList.cs" />
     <Compile Include="Model\Stone.cs" />
     <Compile Include="Model\Walker.cs" />
+    <Compile Include="View\Pause.cs" />
     <Compile Include="View\MyForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="View\MyForm.Designer.cs">
       <DependentUpon>MyForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Model\Model.cs" />
+    <Compile Include="Model\GameModel.cs" />
     <Compile Include="Controller\Controller.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -101,8 +102,7 @@
     <Content Include="Images\кирпич.jpg" />
     <Content Include="Images\пуля.png" />
     <Content Include="Images\солдат.png" />
-    <Content Include="Model\WallMap.txt" />
-    <Content Include="View\Screensaver.txt" />
+    <Content Include="Model\Map.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

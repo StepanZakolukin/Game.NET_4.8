@@ -2,17 +2,17 @@
 {
     public class Bullet : GameObjects
     {
-        public Bullet(int angleInDegrees, Point location, string pathToTheFile = @"..\..\Images\пуля.png", int drawingPriority = 1)
+        public Bullet(int angleInDegrees, Point location, GameModel model, string pathToTheFile = @"..\..\Images\пуля.png", int drawingPriority = 1)
             : base(location, pathToTheFile, drawingPriority)
         {
             AngleInDegrees = angleInDegrees;
             Priority = 2;
-            Forward();
+            Forward(model);
         }
 
-        public void Forward()
+        public void Forward(GameModel model)
         {
-            var neighbour = Model.Map[Walker.MovingForwad[AngleInDegrees % 360] + Location];
+            var neighbour = model.Map[Walker.MovingForwad[AngleInDegrees % 360] + Location];
 
             if (!(neighbour is Wall || neighbour is Player || neighbour is Bullet))
                 Delta = Walker.MovingForwad[AngleInDegrees % 360];

@@ -9,7 +9,7 @@ namespace WindowsForm.Model
         public readonly int Height;
         public readonly int Width;
 
-        public Playground(string pathToTheFile = @"..\..\Model\WallMap.txt") 
+        public Playground(string pathToTheFile = @"..\..\Model\Map.txt") 
         {
             var wallMap = File.ReadAllText(pathToTheFile).Split('\n')
                 .Select(st => st.Split('\t'))
