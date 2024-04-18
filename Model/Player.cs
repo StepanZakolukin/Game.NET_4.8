@@ -2,7 +2,7 @@
 {
     public class Player : Characters
     {
-        public Player(int angleInDegrees, Point location, string pathToTheFile = @"..\..\Images\солдат.png") : base(location, pathToTheFile)
+        public Player(int angleInDegrees, Point location, string pathToTheFile = @"..\..\Images\Player.png") : base(location, pathToTheFile)
         {
             AngleInDegrees = angleInDegrees;
         }

@@ -25,9 +25,9 @@ namespace MainWindow
             BackColor = Color.Black;
             Size = new Size() { Height = 450, Width = 800 };
             WindowState = FormWindowState.Maximized;
-            Text = "Защитник Брестской Крепости";
+            Text = "Защитник Брестской крепости";
 
-            PauseImages = new[] { Image.FromFile(@"..\..\Images\PauseButton.png"), Image.FromFile(@"..\..\Images\PauseButton1.png") };
+            PauseImages = new[] { Image.FromFile(@"..\..\Images\PauseTurnOn.png"), Image.FromFile(@"..\..\Images\PauseTurnOff.png") };
             SizeChanged += UpdateFieldValues;
 
             OpenTheMainMenu();
@@ -45,14 +45,14 @@ namespace MainWindow
 
         void OpenTheMainMenu()
         {
-            BackgroundImage = Image.FromFile(@"..\..\Images\стена4.jpg");
+            BackgroundImage = Image.FromFile(@"..\..\Images\MainMenu.jpg");
             BackgroundImageLayout = ImageLayout.Zoom;
 
             StartButton = new Button()
             {
-                BackgroundImage = Image.FromFile(@"..\..\Images\кнопка.png"),
+                BackgroundImage = Image.FromFile(@"..\..\Images\StartTheGame.png"),
                 BackgroundImageLayout = ImageLayout.Zoom,
-                BackColor = Color.FromArgb(120, 30, 18)
+                BackColor = Color.FromArgb(0, 0, 0, 0),
             };
             Controls.Add(StartButton);
 
@@ -63,7 +63,7 @@ namespace MainWindow
         }
 
         public static void ChangeThePausePicture() => 
-            PauseButton.BackgroundImage = PauseButton.BackgroundImage == PauseImages[(int)Pause.ToPut] ? PauseImages[(int)Pause.Remove] : PauseImages[(int)Pause.ToPut];
+            PauseButton.BackgroundImage = PauseButton.BackgroundImage == PauseImages[(int)Pause.TurnOn] ? PauseImages[(int)Pause.TurnOff] : PauseImages[(int)Pause.TurnOn];
 
         public void CloseTheMainMenu()
         {
@@ -75,8 +75,8 @@ namespace MainWindow
 
         void UpdateTheFieldsForTheMenu(object sender, EventArgs e)
         {
-            StartButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 12), (int)(InitialCoordinateOfTheMap.Y + ImageSize * 12));
-            StartButton.Size = new Size() { Width = (int)(8 * ImageSize), Height = (int)(ImageSize * 2) };
+            StartButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 16.3), (int)(InitialCoordinateOfTheMap.Y + ImageSize * 11));
+            StartButton.Size = new Size() { Width = (int)(6 * ImageSize), Height = (int)(2 * ImageSize) };
         }
 
         void DisableGameManagementAndRendering()
@@ -107,8 +107,8 @@ namespace MainWindow
 
             PauseButton = new Button()
             {
-                BackColor = Color.White,
-                BackgroundImage = PauseImages[(int)Pause.ToPut],
+                BackColor = Color.FromArgb(0, 0, 0, 0),
+                BackgroundImage = PauseImages[(int)Pause.TurnOn],
                 BackgroundImageLayout = ImageLayout.Zoom
             };
 
@@ -129,12 +129,12 @@ namespace MainWindow
         void WithdrawTheGameScore(object sender, PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-            e.Graphics.DrawString($"Счёт: {Model.NumberOfActiveBots}", new Font("Arial", Math.Max(ImageSize / 2, 1), FontStyle.Bold), Brushes.White, CoordinatesOfTheInscription);
+            e.Graphics.DrawString($"Счёт: {Model.NumberOfActiveBots}", new Font("Courier New", Math.Max(ImageSize / 2, 1), FontStyle.Bold), Brushes.White, CoordinatesOfTheInscription);
         }
 
         void DrawingTheModel(object sender, PaintEventArgs e)
         {
-            var stone = Image.FromFile(@"..\..\Images\камень.jpg");
+            var stone = Image.FromFile(@"..\..\Images\Stone.jpg");
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
             for (var x = 0; x < Model.Map.Width; x++)

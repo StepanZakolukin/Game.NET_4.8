@@ -98,10 +98,15 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="Images\камень.jpg" />
-    <Content Include="Images\кирпич.jpg" />
-    <Content Include="Images\пуля.png" />
-    <Content Include="Images\солдат.png" />
+    <Content Include="Images\Bot.png" />
+    <Content Include="Images\Bullet.png" />
+    <Content Include="Images\MainMenu.jpg" />
+    <Content Include="Images\PauseTurnOff.png" />
+    <Content Include="Images\PauseTurnOn.png" />
+    <Content Include="Images\Player.png" />
+    <Content Include="Images\StartTheGame.png" />
+    <Content Include="Images\Stone.jpg" />
+    <Content Include="Images\Wall.jpg" />
     <Content Include="Model\Map.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

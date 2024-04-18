@@ -88,7 +88,7 @@ namespace WindowsForm.Model
             var random = new Random();
             (var x, var y) = (int.MaxValue, int.MaxValue);
 
-            while (!Map.InBounds(new Point(x, y)) || !(Map[x, y] is Stone))
+            while (!Map.InBounds(new Point(x, y)) || !(Map[x, y] is Stone) || Player != null && Math.Abs(Player.Location.X - x) > 4 && Math.Abs(Player.Location.Y - y) > 4)
                 (x, y) = (random.Next(1, Map.Width - 1), random.Next(1, Map.Height - 1));
 
             return new Point(x, y);

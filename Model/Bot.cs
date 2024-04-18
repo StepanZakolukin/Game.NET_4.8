@@ -5,7 +5,7 @@ namespace WindowsForm.Model
 {
     public class Bot : Characters
     {
-        public Bot(Point location, string pathToTheFile = @"..\..\Images\солдат.png") : base(location, pathToTheFile)
+        public Bot(Point location, string pathToTheFile = @"..\..\Images\Bot.png") : base(location, pathToTheFile)
         {
         }
 

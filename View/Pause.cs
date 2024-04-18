@@ -2,7 +2,7 @@
 {
     enum Pause
     {
-        ToPut,
-        Remove
+        TurnOn,
+        TurnOff
     }
 }
