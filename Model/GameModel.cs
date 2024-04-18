@@ -33,13 +33,11 @@ namespace WindowsForm.Model
 
             for (var x = 0; x < Map.Width; x++)
                 for (var y = 0; y < Map.Height; y++)
-                {
                     foreach(var creature in Map[x, y])
                     {
                         var targetLogicalLocation = creature.Location + creature.Delta;
                         creatures[targetLogicalLocation.X, targetLogicalLocation.Y].Add(creature);
                     }
-                }
 
             return creatures;
         }
@@ -64,6 +62,8 @@ namespace WindowsForm.Model
         private static List<GameObjects> SelectWinnerCandidatePerLocation(List<GameObjects>[,] creatures, int x, int y)
         {
             var sortedСreatures = creatures[x, y].OrderBy(creature => creature.Priority);
+
+            if (sortedСreatures.Last() is Bullet) return new List<GameObjects>() { sortedСreatures.First() };
 
             return sortedСreatures.Where(creature => !sortedСreatures.Last().DeadInConflict(creature)).ToList();
         }
