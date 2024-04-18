@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 
 namespace WindowsForm.Model
 {
@@ -15,12 +16,27 @@ namespace WindowsForm.Model
 
             TurnToThePlayerAndShoot(model);
 
-            var followingLocation = FindingAWay.FindAWay(model.Map, model.Player.Location, Walker.OfSets
+            foreach(var followingLocation in FindingAWay.FindAWay(model.Map, model.Player.Location, Walker.OfSets
                 .Select(ofset => Location + ofset)
-                .ToHashSet())
-                .FirstOrDefault();
+                .ToHashSet()))
+            {
+                if (CheckIfThePositionIsAvailable(followingLocation.Value, model))
+                {
+                    Delta = followingLocation.Value - Location;
+                    break;
+                }
+            }
+        }
 
-            if (followingLocation != null) Delta = followingLocation.Value - Location;
+        private bool CheckIfThePositionIsAvailable(Point location, GameModel model)
+        {
+            foreach (var bot in model.ArmyOfBots)
+            {
+                if (bot == this) break;
+                if (bot.Location + bot.Delta == location) return false;
+            }
+
+            return true;
         }
 
         void TurnToThePlayerAndShoot(GameModel model)
