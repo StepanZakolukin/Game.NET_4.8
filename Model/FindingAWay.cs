@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace WindowsForm.Model
 {
@@ -14,8 +15,8 @@ namespace WindowsForm.Model
             {
                 var point = queue.Dequeue();
 
-                if (!map.InBounds(point.Value) || map[point.Value] is Wall
-                    || map[point.Value] is Bullet || map[point.Value] is Bot)
+                if (!map.InBounds(point.Value) || map[point.Value].Last() is Wall
+                    || map[point.Value].Any(creature => creature is Bullet) || map[point.Value].Any(creature => creature is Bot))
                     continue;
 
                 if (startingPositions.Contains(point.Value)) yield return point;

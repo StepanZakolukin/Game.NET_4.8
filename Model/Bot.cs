@@ -12,7 +12,7 @@ namespace WindowsForm.Model
 
         public void MakeAMove(GameModel model)
         {
-            if (!(model.Map[model.Player.Location] is Player)) return;
+            if (!model.Map[model.Player.Location].Contains(model.Player)) return;
 
             TurnToThePlayerAndShoot(model);
 
@@ -43,7 +43,8 @@ namespace WindowsForm.Model
         {
             var distance = Location - model.Player.Location;
 
-            if (distance.Y < 0 && distance.X == 0 && Enumerable.Range(Location.Y + 1, Math.Abs(distance.Y) - 1).All(y => model.Map[Location.X, y] is Stone))
+            if (distance.Y < 0 && distance.X == 0 && Enumerable.Range(Location.Y + 1,
+                Math.Abs(distance.Y) - 1).All(y => model.Map[Location.X, y].All(creature => !(creature is Wall) && !(creature is Bot))))
             {
                 switch (AngleInDegrees % 360)
                 {
@@ -53,7 +54,8 @@ namespace WindowsForm.Model
                 }
                 Shoot(model); return;
             }
-            else if (distance.Y > 0 && distance.X == 0 && Enumerable.Range(model.Player.Location.Y + 1, distance.Y - 1).All(y => model.Map[Location.X, y] is Stone))
+            else if (distance.Y > 0 && distance.X == 0 && Enumerable.Range(model.Player.Location.Y + 1,
+                distance.Y - 1).All(y => model.Map[Location.X, y].All(creature => !(creature is Wall) && !(creature is Bot))))
             {
                 switch (AngleInDegrees % 360)
                 {
@@ -63,7 +65,8 @@ namespace WindowsForm.Model
                 }
                 Shoot(model); return;
             }
-            else if (distance.X < 0 && distance.Y == 0 && Enumerable.Range(Location.X + 1, Math.Abs(distance.X) - 1).All(x => model.Map[x, Location.Y] is Stone))
+            else if (distance.X < 0 && distance.Y == 0 && Enumerable.Range(Location.X + 1,
+                Math.Abs(distance.X) - 1).All(x => model.Map[x, Location.Y].All(creature => !(creature is Wall) && !(creature is Bot))))
             {
                 switch (AngleInDegrees % 360)
                 {
@@ -73,7 +76,8 @@ namespace WindowsForm.Model
                 }
                 Shoot(model); return;
             }
-            else if (distance.X > 0 && distance.Y == 0 && Enumerable.Range(model.Player.Location.X + 1, distance.X - 1).All(x => model.Map[x, Location.Y] is Stone))
+            else if (distance.X > 0 && distance.Y == 0 && Enumerable.Range(model.Player.Location.X + 1,
+                distance.X - 1).All(x => model.Map[x, Location.Y].All(creature => !(creature is Wall) && !(creature is Bot))))
             {
                 switch (AngleInDegrees % 360)
                 {

@@ -5,6 +5,7 @@
         public Stone(Point location, string pathToTheFile = @"..\..\Images\Stone.jpg") : base(location, pathToTheFile)
         {
             Priority = 0;
+            AngleInDegrees = 0;
         }
     }
 }

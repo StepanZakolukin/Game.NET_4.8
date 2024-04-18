@@ -13,10 +13,7 @@
             Location = new Point(x, y);
         }
 
-        public void Shoot(GameModel model)
-        {
-            if (!(model.Map[Walker.MovingForwad[AngleInDegrees % 360] + Location] is Wall))
-                model.Map[Walker.MovingForwad[AngleInDegrees % 360] + Location] = new Bullet(AngleInDegrees, Location, model);
-        }
+        public void Shoot(GameModel model) 
+            => model.Map[Walker.MovingForwad[AngleInDegrees % 360] + Location].Add(new Bullet(AngleInDegrees, Location));
     }
 }

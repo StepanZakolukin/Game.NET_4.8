@@ -18,8 +18,8 @@ namespace WindowsForm.Model
         {
             Map = map;
             var playerLocation = FindAPositionToCreateAnOject();
-            Map[playerLocation] = new Player(90, playerLocation);
-            Player = (Player)Map[playerLocation];
+            Map[playerLocation].Add(new Player(90, playerLocation));
+            Player = (Player)Map[playerLocation].Last();
             ArmyOfBots = new List<Bot>();
         }
 
@@ -34,8 +34,11 @@ namespace WindowsForm.Model
             for (var x = 0; x < Map.Width; x++)
                 for (var y = 0; y < Map.Height; y++)
                 {
-                    var targetLogicalLocation = Map[x, y].Location + Map[x, y].Delta;
-                    creatures[targetLogicalLocation.X, targetLogicalLocation.Y].Add(Map[x, y]);
+                    foreach(var creature in Map[x, y])
+                    {
+                        var targetLogicalLocation = creature.Location + creature.Delta;
+                        creatures[targetLogicalLocation.X, targetLogicalLocation.Y].Add(creature);
+                    }
                 }
 
             return creatures;
@@ -49,32 +52,34 @@ namespace WindowsForm.Model
                 for (var y = 0; y < Map.Height; y++)
                 {
                     Map[x, y] = SelectWinnerCandidatePerLocation(creaturesPerLocation, x, y);
-                    Map[x, y].CommandAreExecuted(x, y);
+
+                    foreach(var creature in Map[x, y])
+                        creature.CommandAreExecuted(x, y);
                 }
 
             StateChanged();
-            if (Player != Map[Player.Location]) TheGameIsOver();
+            if (!Map[Player.Location].Contains(Player)) TheGameIsOver();
         }
 
-        private static GameObjects SelectWinnerCandidatePerLocation(List<GameObjects>[,] creatures, int x, int y)
+        private static List<GameObjects> SelectWinnerCandidatePerLocation(List<GameObjects>[,] creatures, int x, int y)
         {
             var sortedСreatures = creatures[x, y].OrderBy(creature => creature.Priority);
 
-            return sortedСreatures.Any() ? sortedСreatures.Last() : new Stone(new Point(x, y));
+            return sortedСreatures.Where(creature => !sortedСreatures.Last().DeadInConflict(creature)).ToList();
         }
 
         public void CreateABot()
         {
             var location = FindAPositionToCreateAnOject();
-            Map[location] = new Bot(location);
-            ArmyOfBots.Add((Bot)Map[location]);
+            Map[location].Add(new Bot(location));
+            ArmyOfBots.Add((Bot)Map[location].Last());
             numberOfBots++;
         }
 
         public void SetTheBotsInMotion(GameModel model)
         {
             ArmyOfBots = ArmyOfBots
-                .Where(bot => bot == Map[bot.Location])
+                .Where(bot => Map[bot.Location].Contains(bot))
                 .ToList();
 
             NumberOfActiveBots = numberOfBots - ArmyOfBots.Count;
@@ -88,7 +93,7 @@ namespace WindowsForm.Model
             var random = new Random();
             (var x, var y) = (int.MaxValue, int.MaxValue);
 
-            while (!Map.InBounds(new Point(x, y)) || !(Map[x, y] is Stone) || Player != null && Math.Abs(Player.Location.X - x) > 4 && Math.Abs(Player.Location.Y - y) > 4)
+            while (!Map.InBounds(new Point(x, y)) || Map[x, y].All(creature => !(creature is Stone)) || Player != null && Math.Abs(Player.Location.X - x) > 4 && Math.Abs(Player.Location.Y - y) > 4)
                 (x, y) = (random.Next(1, Map.Width - 1), random.Next(1, Map.Height - 1));
 
             return new Point(x, y);

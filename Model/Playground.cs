@@ -1,11 +1,12 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace WindowsForm.Model
 {
     public class Playground
     {
-        public GameObjects[,] Map;
+        public List<GameObjects>[,] Map;
         public readonly int Height;
         public readonly int Width;
 
@@ -22,17 +23,19 @@ namespace WindowsForm.Model
 
         private void CreateMap(string[][] array)
         {
-            Map = new GameObjects[Width, Height];
+            Map = new List<GameObjects>[Width, Height];
 
             for (var y = 0; y < Height; y++)
                 for (var x = 0; x < Width; x++)
                 {
-                    if (array[y][x] == "0") Map[x, y] = new Stone(new Point(x, y));
-                    else Map[x, y] = new Wall(new Point(x, y));
+                    Map[x, y] = new List<GameObjects>();
+
+                    if (array[y][x] == "0") Map[x, y].Add(new Stone(new Point(x, y)));
+                    else Map[x, y].Add(new Wall(new Point(x, y)));
                 }
         }
 
-        public GameObjects this[int x, int y]
+        public List<GameObjects> this[int x, int y]
         {
             get { return Map[x, y]; }
             set 
@@ -41,7 +44,7 @@ namespace WindowsForm.Model
             }
         }
 
-        public GameObjects this[Point point]
+        public List<GameObjects> this[Point point]
         {
             get { return Map[point.X, point.Y]; }
             set

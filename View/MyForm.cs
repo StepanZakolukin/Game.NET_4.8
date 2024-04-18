@@ -134,24 +134,16 @@ namespace MainWindow
 
         void DrawingTheModel(object sender, PaintEventArgs e)
         {
-            var stone = Image.FromFile(@"..\..\Images\Stone.jpg");
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
             for (var x = 0; x < Model.Map.Width; x++)
                 for (var y = 0; y < Model.Map.Height; y++)
-                {
-                    var image = Model.Map[x, y].Picture;
-                    var coordinatesOnTheForm = RecalculateTheCoordinatesOnTheForm(new System.Drawing.Point(x, y));
-
-                    if (Model.Map[x, y] is Wall) e.Graphics.DrawImage(image, coordinatesOnTheForm);
-                    else
+                    foreach (var creture in Model.Map[x, y])
                     {
-                        e.Graphics.DrawImage(stone, coordinatesOnTheForm);
-
-                        if (!(Model.Map[x, y] is Stone))
-                            e.Graphics.DrawImage(image, RotateAnArrayOfPoints(coordinatesOnTheForm, Model.Map[x, y].AngleInDegrees * Math.PI / 180));
+                        var image = creture.Picture;
+                        var coordinatesOnTheForm = RecalculateTheCoordinatesOnTheForm(new System.Drawing.Point(x, y));
+                        e.Graphics.DrawImage(image, RotateAnArrayOfPoints(coordinatesOnTheForm, creture.AngleInDegrees * Math.PI / 180));
                     }
-                }
         }
 
         void RecalculateTheValuesOfTheGameButtons(object sender, EventArgs e)

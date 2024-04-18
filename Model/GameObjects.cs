@@ -20,5 +20,7 @@ namespace WindowsForm.Model
         }
 
         public virtual void CommandAreExecuted(int x, int y) => Location = new Point(x, y);
+
+        public virtual bool DeadInConflict(GameObjects gameObjects) => false;
     }
 }
