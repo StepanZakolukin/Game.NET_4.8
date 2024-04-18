@@ -51,6 +51,7 @@
     <Compile Include="Model\Bot.cs" />
     <Compile Include="Model\Characters.cs" />
     <Compile Include="Model\GameObjects.cs" />
+    <Compile Include="Model\Go.cs" />
     <Compile Include="Model\Playground.cs" />
     <Compile Include="Model\Bullet.cs" />
     <Compile Include="Model\FindingAWay.cs" />
