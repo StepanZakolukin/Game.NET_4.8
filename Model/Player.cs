@@ -9,9 +9,6 @@ namespace WindowsForm.Model
             AngleInDegrees = angleInDegrees;
         }
 
-        public override bool DeadInConflict(GameObjects gameObjects) 
-            => !(gameObjects is Stone || gameObjects == this);
-
         public void TurnLeft() => AngleInDegrees += 270;
 
         public void TurnRight() => AngleInDegrees += 90;
@@ -20,7 +17,7 @@ namespace WindowsForm.Model
         {
             var neighbour = model.Map[Walker.OfSets[(int)Go.Back] + Location];
 
-            if (!neighbour.Any(creature => DeadInConflict(creature)))
+            if (!neighbour.Any(creature => creature.DeadInConflict(this)))
                 Delta = Walker.OfSets[(int)Go.Back];
         }
 
@@ -28,7 +25,7 @@ namespace WindowsForm.Model
         {
             var neighbour = model.Map[Walker.OfSets[(int)Go.Forwad] + Location];
 
-            if (!neighbour.Any(creature => DeadInConflict(creature)))
+            if (!neighbour.Any(creature => creature.DeadInConflict(this)))
                 Delta = Walker.OfSets[(int)Go.Forwad];
         }
 
@@ -36,7 +33,7 @@ namespace WindowsForm.Model
         {
             var neighbour = model.Map[Walker.OfSets[(int)Go.Left] + Location];
 
-            if (!neighbour.Any(creature => DeadInConflict(creature)))
+            if (!neighbour.Any(creature => creature.DeadInConflict(this)))
                 Delta = Walker.OfSets[(int)Go.Left];
         }
 
@@ -44,7 +41,7 @@ namespace WindowsForm.Model
         {
             var neighbour = model.Map[Walker.OfSets[(int)Go.Right] + Location];
 
-            if (!neighbour.Any(creature => DeadInConflict(creature)))
+            if (!neighbour.Any(creature => creature.DeadInConflict(this)))
                 Delta = Walker.OfSets[(int)Go.Right];
         }
     }

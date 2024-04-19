@@ -63,7 +63,7 @@ namespace WindowsForm.Model
         {
             var sortedСreatures = creatures[x, y].OrderBy(creature => creature.Priority);
 
-            if (sortedСreatures.Last() is Bullet) return new List<GameObjects>() { sortedСreatures.First() };
+            if (sortedСreatures.Last() is Bullet && sortedСreatures.Count() > 2) return new List<GameObjects>() { sortedСreatures.First() };
 
             return sortedСreatures.Where(creature => !sortedСreatures.Last().DeadInConflict(creature)).ToList();
         }

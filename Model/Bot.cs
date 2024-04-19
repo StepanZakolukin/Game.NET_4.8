@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -16,7 +17,7 @@ namespace WindowsForm.Model
 
             TurnToThePlayerAndShoot(model);
 
-            foreach(var followingLocation in FindingAWay.FindAWay(model.Map, model.Player.Location, Walker.OfSets
+            foreach(var followingLocation in FindAWay(model.Map, model.Player.Location, Walker.OfSets
                 .Select(ofset => Location + ofset)
                 .ToHashSet()))
             {
@@ -26,6 +27,35 @@ namespace WindowsForm.Model
                     break;
                 }
             }
+        }
+
+        public IEnumerable<SinglyLinkedList<Point>> FindAWay(Playground map, Point finish, HashSet<Point> startingPositions)
+        {
+            var queue = new Queue<SinglyLinkedList<Point>>();
+            queue.Enqueue(new SinglyLinkedList<Point>(finish));
+            var visited = new HashSet<Point>() { finish };
+
+            while (queue.Count > 0)
+            {
+                var point = queue.Dequeue();
+
+                if (!map.InBounds(point.Value) || map[point.Value].Any(creature => creature.DeadInConflict(this)))
+                    continue;
+
+                if (startingPositions.Contains(point.Value)) yield return point;
+
+                foreach (var ofset in Walker.OfSets)
+                {
+                    var nextPoint = point.Value + ofset;
+
+                    if (visited.Contains(nextPoint)) continue;
+
+                    visited.Add(nextPoint);
+                    queue.Enqueue(new SinglyLinkedList<Point>(nextPoint, point));
+                }
+            }
+
+            yield break;
         }
 
         private bool CheckIfThePositionIsAvailable(Point location, GameModel model)
@@ -38,6 +68,8 @@ namespace WindowsForm.Model
 
             return true;
         }
+
+        public override bool DeadInConflict(GameObjects gameObjects) => !(gameObjects is Stone || gameObjects == this);
 
         void TurnToThePlayerAndShoot(GameModel model)
         {
