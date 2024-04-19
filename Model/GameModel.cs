@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace WindowsForm.Model
@@ -12,7 +13,8 @@ namespace WindowsForm.Model
         public Playground Map { get; private set; }
         public Player Player { get; private set; }
         private int numberOfBots;
-        public int NumberOfActiveBots { get; private set; }
+        public int NumberOfPoints { get; private set; }
+        public int Record { get; private set; }
 
         public GameModel(Playground map)
         {
@@ -21,6 +23,11 @@ namespace WindowsForm.Model
             Map[playerLocation].Add(new Player(90, playerLocation));
             Player = (Player)Map[playerLocation].Last();
             ArmyOfBots = new List<Bot>();
+
+            var date = File.ReadAllLines(@"..\..\Model\Record.txt").FirstOrDefault();
+            Record = date == null ? 0 : int.Parse(date);
+
+            StateChanged += () => File.WriteAllText(@"..\..\Model\Record.txt", Record.ToString());
         }
 
         public List<GameObjects>[,] GetCandidatesPerLocation()
@@ -55,6 +62,8 @@ namespace WindowsForm.Model
                         creature.CommandAreExecuted(x, y);
                 }
 
+            Record = Math.Max(Record, NumberOfPoints);
+
             StateChanged();
             if (!Map[Player.Location].Contains(Player)) TheGameIsOver();
         }
@@ -63,7 +72,8 @@ namespace WindowsForm.Model
         {
             var sortedСreatures = creatures[x, y].OrderBy(creature => creature.Priority);
 
-            if (sortedСreatures.Last() is Bullet && sortedСreatures.Count() > 2) return new List<GameObjects>() { sortedСreatures.First() };
+            if (sortedСreatures.Last() is Bullet && !sortedСreatures.All(creature => creature is Bullet || creature is Stone))
+                return new List<GameObjects>() { sortedСreatures.First() };
 
             return sortedСreatures.Where(creature => !sortedСreatures.Last().DeadInConflict(creature)).ToList();
         }
@@ -82,7 +92,7 @@ namespace WindowsForm.Model
                 .Where(bot => Map[bot.Location].Contains(bot))
                 .ToList();
 
-            NumberOfActiveBots = numberOfBots - ArmyOfBots.Count;
+            NumberOfPoints = numberOfBots - ArmyOfBots.Count;
 
             foreach (var bot in ArmyOfBots)
                 bot.MakeAMove(model);

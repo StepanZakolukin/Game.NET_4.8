@@ -3,6 +3,8 @@ using System.Drawing;
 using System.Windows.Forms;
 using WindowsForm.Model;
 using WindowsForm.Controller;
+using System.IO;
+using System.Linq;
 
 namespace MainWindow
 {
@@ -12,7 +14,6 @@ namespace MainWindow
         private Controller Controller;
         private float ImageSize { get; set; }
         private PointF InitialCoordinateOfTheMap { get; set; }
-        private RectangleF CoordinatesOfTheInscription;
         public static Button PauseButton { get; private set; }
         private static Image[] PauseImages { get; set; }
         private Button StartButton { get; set; }
@@ -60,10 +61,27 @@ namespace MainWindow
 
             StartButton.Click += StartTheGame;
             SizeChanged += UpdateTheFieldsForTheMenu;
+            Paint += DisplayARecord; 
+        }
+
+        void DisplayARecord(object sender, PaintEventArgs e)
+        {
+            DrawTheText(e, File.ReadAllLines(@"..\..\Model\Record.txt").FirstOrDefault(), new RectangleF(
+                new PointF(InitialCoordinateOfTheMap.X + ImageSize * 7f, InitialCoordinateOfTheMap.Y + 3.5f * ImageSize),
+                new SizeF(10 * ImageSize, ImageSize * 1.34f)), Brushes.DarkRed, new StringFormat()
+                { Alignment = StringAlignment.Far }, ImageSize / 1.34f);
+
+            e.Graphics.DrawImage(Image.FromFile(@"..\..\Images\star.png"), new PointF[]
+            {
+                new PointF(InitialCoordinateOfTheMap.X + 17f * ImageSize, InitialCoordinateOfTheMap.Y + 3.4f * ImageSize),
+                new PointF(InitialCoordinateOfTheMap.X + 18f * ImageSize, InitialCoordinateOfTheMap.Y + 3.4f * ImageSize),
+                new PointF(InitialCoordinateOfTheMap.X + 17f * ImageSize, InitialCoordinateOfTheMap.Y + 4.4f * ImageSize)
+            });
         }
 
         public static void ChangeThePausePicture() => 
-            PauseButton.BackgroundImage = PauseButton.BackgroundImage == PauseImages[(int)Pause.TurnOn] ? PauseImages[(int)Pause.TurnOff] : PauseImages[(int)Pause.TurnOn];
+            PauseButton.BackgroundImage = PauseButton.BackgroundImage == PauseImages[(int)Pause.TurnOn] ? 
+            PauseImages[(int)Pause.TurnOff] : PauseImages[(int)Pause.TurnOn];
 
         public void CloseTheMainMenu()
         {
@@ -71,11 +89,13 @@ namespace MainWindow
             SizeChanged -= UpdateTheFieldsForTheMenu;
             StartButton.Click -= StartTheGame;
             BackgroundImage = null;
+            Paint -= DisplayARecord;
         }
 
         void UpdateTheFieldsForTheMenu(object sender, EventArgs e)
         {
-            StartButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 16.3), (int)(InitialCoordinateOfTheMap.Y + ImageSize * 11));
+            StartButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 16.3),
+                (int)(InitialCoordinateOfTheMap.Y + ImageSize * 11));
             StartButton.Size = new Size() { Width = (int)(6 * ImageSize), Height = (int)(2 * ImageSize) };
         }
 
@@ -88,7 +108,7 @@ namespace MainWindow
             KeyDown -= Controller.MakeAMove;
             MouseWheel -= Controller.RotateThePlayer;
             Paint -= DrawingTheModel;
-            Paint -= WithdrawTheGameScore;
+            Paint -= DrawAGamePanel;
             SizeChanged -= RecalculateTheValuesOfTheGameButtons;
             Model.StateChanged -= Invalidate;
             Model.TheGameIsOver -= DisableGameManagementAndRendering;
@@ -115,7 +135,7 @@ namespace MainWindow
             Controls.Add(PauseButton);
 
             Paint += DrawingTheModel;
-            Paint += WithdrawTheGameScore;
+            Paint += DrawAGamePanel;
             
             RecalculateTheValuesOfTheGameButtons("", new EventArgs());
             SizeChanged += RecalculateTheValuesOfTheGameButtons;
@@ -126,10 +146,29 @@ namespace MainWindow
             MouseWheel += Controller.RotateThePlayer;
         }
 
-        void WithdrawTheGameScore(object sender, PaintEventArgs e)
+        void DrawAGamePanel(object sender, PaintEventArgs e)
+        {
+            DrawTheText(e, $"Счёт: {Model.NumberOfPoints}",
+                new RectangleF(new PointF(InitialCoordinateOfTheMap.X, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f),
+                new SizeF(InitialCoordinateOfTheMap.X + 6 * ImageSize, ImageSize)), Brushes.White, new StringFormat(), ImageSize / 2);
+
+            DrawTheText(e, $"Рекорд: {Model.Record}",
+                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 7, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f),
+                new SizeF(InitialCoordinateOfTheMap.X + 6 * ImageSize, ImageSize)), Brushes.White, new StringFormat()
+                { Alignment = StringAlignment.Far}, ImageSize / 2);
+
+            e.Graphics.DrawImage(Image.FromFile(@"..\..\Images\star.png"), new PointF[]
+            {
+                new PointF(InitialCoordinateOfTheMap.X + 14.5f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize * 0.7f),
+                new PointF(InitialCoordinateOfTheMap.X + 15.2f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize * 0.7f),
+                new PointF(InitialCoordinateOfTheMap.X + 14.5f * ImageSize, InitialCoordinateOfTheMap.Y)
+            });
+        }
+
+        void DrawTheText(PaintEventArgs e, string text, RectangleF location, Brush brushes, StringFormat format, float size)
         {
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-            e.Graphics.DrawString($"Счёт: {Model.NumberOfActiveBots}", new Font("Courier New", Math.Max(ImageSize / 2, 1), FontStyle.Bold), Brushes.White, CoordinatesOfTheInscription);
+            e.Graphics.DrawString(text, new Font("Courier New", Math.Max(size, 1), FontStyle.Bold), brushes, location, format);
         }
 
         void DrawingTheModel(object sender, PaintEventArgs e)
@@ -159,10 +198,6 @@ namespace MainWindow
 
             InitialCoordinateOfTheMap = new PointF((ClientSize.Width - ImageSize * Model.Map.Width) / 2,
                 (ClientSize.Height - ImageSize * (Model.Map.Height + 1)) / 2 + ImageSize);
-
-            CoordinatesOfTheInscription = new RectangleF(
-                new PointF(InitialCoordinateOfTheMap.X, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f),
-                new SizeF(InitialCoordinateOfTheMap.X + ImageSize * (Model.Map.Width - 1), ImageSize));
         }
 
         PointF[] RecalculateTheCoordinatesOnTheForm(System.Drawing.Point positionOnTheMap)

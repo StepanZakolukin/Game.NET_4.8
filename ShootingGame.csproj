@@ -104,10 +104,12 @@
     <Content Include="Images\PauseTurnOff.png" />
     <Content Include="Images\PauseTurnOn.png" />
     <Content Include="Images\Player.png" />
+    <Content Include="Images\star.png" />
     <Content Include="Images\StartTheGame.png" />
     <Content Include="Images\Stone.jpg" />
     <Content Include="Images\Wall.jpg" />
     <Content Include="Model\Map.txt" />
+    <Content Include="Model\Record.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
