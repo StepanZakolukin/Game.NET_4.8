@@ -99,6 +99,7 @@
   <ItemGroup>
     <Content Include="Images\Bot.png" />
     <Content Include="Images\Bullet.png" />
+    <Content Include="Images\ButtonToGoToTheMenu.png" />
     <Content Include="Images\MainMenu.jpg" />
     <Content Include="Images\PauseTurnOff.png" />
     <Content Include="Images\PauseTurnOn.png" />
@@ -107,6 +108,7 @@
     <Content Include="Images\StartTheGame.png" />
     <Content Include="Images\Stone.jpg" />
     <Content Include="Images\Wall.jpg" />
+    <Content Include="Images\ResultsWindow.png" />
     <Content Include="Model\Map.txt" />
     <Content Include="Model\Record.txt" />
   </ItemGroup>

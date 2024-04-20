@@ -23,12 +23,12 @@ namespace WindowsForm.Controller
             MainTimer.Start();
 
             BotCreationTimer = new Timer();
-            BotCreationTimer.Interval = 8000;
+            BotCreationTimer.Interval = 6000;
             BotCreationTimer.Tick += (object sender, EventArgs args) => Model.CreateABot();
             BotCreationTimer.Start();
 
             BotManagementTimer = new Timer();
-            BotManagementTimer.Interval = 600;
+            BotManagementTimer.Interval = 400;
             BotManagementTimer.Tick += (object sender, EventArgs args) => Model.SetTheBotsInMotion(Model);
             BotManagementTimer.Start();
         }

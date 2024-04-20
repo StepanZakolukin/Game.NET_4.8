@@ -9,6 +9,7 @@ namespace WindowsForm.Model
     {
         public event Action StateChanged;
         public event Action TheGameIsOver;
+        public bool RecordHasBeenUpdated { get; private set; }
         public List<Bot> ArmyOfBots { get; private set; }
         public Playground Map { get; private set; }
         public Player Player { get; private set; }
@@ -62,7 +63,11 @@ namespace WindowsForm.Model
                         creature.CommandAreExecuted(x, y);
                 }
 
-            Record = Math.Max(Record, NumberOfPoints);
+            if (Record < NumberOfPoints)
+            {
+                RecordHasBeenUpdated = true;
+                Record = NumberOfPoints;
+            }
 
             StateChanged();
             if (!Map[Player.Location].Contains(Player)) TheGameIsOver();

@@ -17,6 +17,7 @@ namespace MainWindow
         public static Button PauseButton { get; private set; }
         private static Image[] PauseImages { get; set; }
         private Button StartButton { get; set; }
+        private Button ButtonToGoToTheMenu { get; set; }
         public MyForm(GameModel model)
         {
             Model = model;
@@ -67,8 +68,8 @@ namespace MainWindow
         void CloseTheGame()
         {
             Controls.Clear();
-
             PauseButton.Click -= Controller.PutItOnPause;
+
             Click -= Controller.ToShoot;
             KeyDown -= Controller.MakeAMove;
             MouseWheel -= Controller.RotateThePlayer;
@@ -77,7 +78,7 @@ namespace MainWindow
             SizeChanged -= RecalculateTheValuesOfTheGameButtons;
             Model.StateChanged -= Invalidate;
             Model.TheGameIsOver -= CloseTheGame;
-            Model.TheGameIsOver -= OpenTheMainMenu;
+            Model.TheGameIsOver -= OpenTheResultsWindow;
 
             Controller.StopTimers();
         }
@@ -88,7 +89,7 @@ namespace MainWindow
             Controller = new Controller(Model);
             Model.StateChanged += Invalidate;
             Model.TheGameIsOver += CloseTheGame;
-            Model.TheGameIsOver += OpenTheMainMenu;
+            Model.TheGameIsOver += OpenTheResultsWindow;
 
             PauseButton = new Button()
             {
@@ -131,6 +132,52 @@ namespace MainWindow
             StartButton.Size = new Size() { Width = (int)(6 * ImageSize), Height = (int)(2 * ImageSize) };
         }
 
+        void OpenTheResultsWindow()
+        {
+            Paint += DrawTheResultsWindow;
+
+            ButtonToGoToTheMenu = new Button()
+            {
+                BackgroundImage = Image.FromFile(@"..\..\Images\ButtonToGoToTheMenu.png"),
+                BackgroundImageLayout = ImageLayout.Zoom,
+                BackColor = Color.FromArgb(0, 0, 0, 0),
+            };
+            Controls.Add(ButtonToGoToTheMenu);
+
+            UpdateTheCoordinatesOfTheMenuTransitionButton("", new EventArgs());
+
+            SizeChanged += UpdateTheCoordinatesOfTheMenuTransitionButton;
+            ButtonToGoToTheMenu.Click += ReturnToTheMenu;
+        }
+
+        void CloseTheResultsWindow()
+        {
+            Paint -= DrawTheResultsWindow;
+            Controls.Clear();
+            SizeChanged -= UpdateTheCoordinatesOfTheMenuTransitionButton;
+            ButtonToGoToTheMenu.Click -= ReturnToTheMenu;
+        }
+
+        void ReturnToTheMenu(object sender, EventArgs e)
+        {
+            CloseTheResultsWindow();
+            OpenTheMainMenu();
+        }
+
+        void DrawTheResultsWindow(object sender, PaintEventArgs e)
+        {
+            e.Graphics.DrawImage(Image.FromFile(@"..\..\Images\ResultsWindow.png"), new PointF[]
+            {
+                new PointF(InitialCoordinateOfTheMap.X + 6 * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 1),
+                new PointF(InitialCoordinateOfTheMap.X + 26 * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 1),
+                new PointF(InitialCoordinateOfTheMap.X + 6 * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 16)
+            });
+
+            DrawTheText(e, Model.RecordHasBeenUpdated ? $"Вы обновили рекорд. Игра была завершена со счётом {Model.NumberOfPoints}" : $"Игра была завершена со счётом {Model.NumberOfPoints}",
+                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 9.5f, InitialCoordinateOfTheMap.Y + 5 * ImageSize),
+                new SizeF(12 * ImageSize, 5 * ImageSize)), Brushes.Black, new StringFormat() { Alignment = StringAlignment.Center }, ImageSize / 1.2f);
+        }
+
         void DrawAGamePanel(object sender, PaintEventArgs e)
         {
             DrawTheText(e, $"Счёт: {Model.NumberOfPoints}",
@@ -150,10 +197,10 @@ namespace MainWindow
             });
         }
 
-        void DrawTheText(PaintEventArgs e, string text, RectangleF location, Brush brushes, StringFormat format, float size)
+        void DrawTheText(PaintEventArgs e, string text, RectangleF location, Brush brushes, StringFormat format, float fontSize)
         {
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-            e.Graphics.DrawString(text, new Font("Courier New", Math.Max(size, 1), FontStyle.Bold), brushes, location, format);
+            e.Graphics.DrawString(text, new Font("Courier New", Math.Max(fontSize, 1), FontStyle.Bold), brushes, location, format);
         }
 
         void DrawingTheModel(object sender, PaintEventArgs e)
@@ -190,6 +237,13 @@ namespace MainWindow
             PauseButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * (Model.Map.Width - 1)),
                 (int)(InitialCoordinateOfTheMap.Y - ImageSize));
             PauseButton.Size = new Size((int)ImageSize, (int)ImageSize);
+        }
+
+        void UpdateTheCoordinatesOfTheMenuTransitionButton(object sender, EventArgs e)
+        {
+            ButtonToGoToTheMenu.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 13),
+                (int)(InitialCoordinateOfTheMap.Y + ImageSize * 10.3));
+            ButtonToGoToTheMenu.Size = new Size() { Width = (int)(5 * ImageSize), Height = (int)(2 * ImageSize) };
         }
 
         void UpdateFieldValues(object sender, EventArgs e)
