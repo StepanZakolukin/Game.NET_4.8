@@ -2,10 +2,11 @@
 {
     public class Characters : GameObjects
     {
-        public Characters(Point location, string pathToTheFile, int drawingPriority = 1) : base(location, pathToTheFile, drawingPriority)
+        public Characters(Point location, string pathToTheFile, int health) : base(location, pathToTheFile, health, 1)
         {
-            Priority = 1;
         }
+
+        public override void DeductDamage() => Health--;
 
         public override void CommandAreExecuted(int x, int y)
         {

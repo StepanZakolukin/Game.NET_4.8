@@ -2,13 +2,14 @@
 {
     public class Bullet : GameObjects
     {
-        public Bullet(int angleInDegrees, Point location, string pathToTheFile = @"..\..\Images\Bullet.png", int drawingPriority = 1)
-            : base(location, pathToTheFile, drawingPriority)
+        public Bullet(int angleInDegrees, Point location, string pathToTheFile = @"..\..\Images\Bullet.png", int health = 1)
+            : base(location, pathToTheFile, health, 2)
         {
             AngleInDegrees = angleInDegrees;
-            Priority = 2;
             Forward();
         }
+
+        public override void DeductDamage() => Health--;
 
         public void Forward() => Delta = Walker.MovingForwad[AngleInDegrees % 360];
 

@@ -2,9 +2,8 @@
 {
     public class Wall : GameObjects
     {
-        public Wall(Point location, string pathToTheFile = @"..\..\Images\Wall.jpg") : base(location, pathToTheFile)
+        public Wall(Point location, string pathToTheFile = @"..\..\Images\Wall.jpg") : base(location, pathToTheFile, int.MaxValue, 3)
         {
-            Priority = 3;
             AngleInDegrees = 0;
         }
 

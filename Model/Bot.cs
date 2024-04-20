@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace WindowsForm.Model
 {
     public class Bot : Characters
     {
-        public Bot(Point location, string pathToTheFile = @"..\..\Images\Bot.png") : base(location, pathToTheFile)
+        public Bot(Point location, string pathToTheFile = @"..\..\Images\Bot.png", int health = 1) : base(location, pathToTheFile, health)
         {
         }
 

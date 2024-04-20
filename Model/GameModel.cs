@@ -75,10 +75,15 @@ namespace WindowsForm.Model
 
         private static List<GameObjects> SelectWinnerCandidatePerLocation(List<GameObjects>[,] creatures, int x, int y)
         {
-            var sortedСreatures = creatures[x, y].OrderBy(creature => creature.Priority);
+            var sortedСreatures = creatures[x, y].OrderBy(creature => creature.Priority).ToList();
 
             if (sortedСreatures.Last() is Bullet && !sortedСreatures.All(creature => creature is Bullet || creature is Stone))
-                return new List<GameObjects>() { sortedСreatures.First() };
+            {
+                for (var i = 0; i < sortedСreatures.Count; i++)
+                    sortedСreatures[i].DeductDamage();
+
+                return sortedСreatures.Where(creature => creature.Health != 0).ToList();
+            }
 
             return sortedСreatures.Where(creature => !sortedСreatures.Last().DeadInConflict(creature)).ToList();
         }

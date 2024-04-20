@@ -2,9 +2,8 @@
 {
     public class Stone : GameObjects
     {
-        public Stone(Point location, string pathToTheFile = @"..\..\Images\Stone.jpg") : base(location, pathToTheFile)
+        public Stone(Point location, string pathToTheFile = @"..\..\Images\Stone.jpg") : base(location, pathToTheFile, int.MaxValue)
         {
-            Priority = 0;
             AngleInDegrees = 0;
         }
     }
