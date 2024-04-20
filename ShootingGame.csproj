@@ -47,7 +47,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MainMenu.cs" />
     <Compile Include="Model\Bot.cs" />
     <Compile Include="Model\Characters.cs" />
     <Compile Include="Model\GameObjects.cs" />

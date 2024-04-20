@@ -64,42 +64,7 @@ namespace MainWindow
             Paint += DisplayARecord; 
         }
 
-        void DisplayARecord(object sender, PaintEventArgs e)
-        {
-            DrawTheText(e, File.ReadAllLines(@"..\..\Model\Record.txt").FirstOrDefault(), new RectangleF(
-                new PointF(InitialCoordinateOfTheMap.X + ImageSize * 7f, InitialCoordinateOfTheMap.Y + 3.5f * ImageSize),
-                new SizeF(10 * ImageSize, ImageSize * 1.34f)), Brushes.DarkRed, new StringFormat()
-                { Alignment = StringAlignment.Far }, ImageSize / 1.34f);
-
-            e.Graphics.DrawImage(Image.FromFile(@"..\..\Images\star.png"), new PointF[]
-            {
-                new PointF(InitialCoordinateOfTheMap.X + 17f * ImageSize, InitialCoordinateOfTheMap.Y + 3.4f * ImageSize),
-                new PointF(InitialCoordinateOfTheMap.X + 18f * ImageSize, InitialCoordinateOfTheMap.Y + 3.4f * ImageSize),
-                new PointF(InitialCoordinateOfTheMap.X + 17f * ImageSize, InitialCoordinateOfTheMap.Y + 4.4f * ImageSize)
-            });
-        }
-
-        public static void ChangeThePausePicture() => 
-            PauseButton.BackgroundImage = PauseButton.BackgroundImage == PauseImages[(int)Pause.TurnOn] ? 
-            PauseImages[(int)Pause.TurnOff] : PauseImages[(int)Pause.TurnOn];
-
-        public void CloseTheMainMenu()
-        {
-            Controls.Clear();;
-            SizeChanged -= UpdateTheFieldsForTheMenu;
-            StartButton.Click -= StartTheGame;
-            BackgroundImage = null;
-            Paint -= DisplayARecord;
-        }
-
-        void UpdateTheFieldsForTheMenu(object sender, EventArgs e)
-        {
-            StartButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 16.3),
-                (int)(InitialCoordinateOfTheMap.Y + ImageSize * 11));
-            StartButton.Size = new Size() { Width = (int)(6 * ImageSize), Height = (int)(2 * ImageSize) };
-        }
-
-        void DisableGameManagementAndRendering()
+        void CloseTheGame()
         {
             Controls.Clear();
 
@@ -111,7 +76,7 @@ namespace MainWindow
             Paint -= DrawAGamePanel;
             SizeChanged -= RecalculateTheValuesOfTheGameButtons;
             Model.StateChanged -= Invalidate;
-            Model.TheGameIsOver -= DisableGameManagementAndRendering;
+            Model.TheGameIsOver -= CloseTheGame;
             Model.TheGameIsOver -= OpenTheMainMenu;
 
             Controller.StopTimers();
@@ -122,7 +87,7 @@ namespace MainWindow
             Model = new GameModel(new Playground());
             Controller = new Controller(Model);
             Model.StateChanged += Invalidate;
-            Model.TheGameIsOver += DisableGameManagementAndRendering;
+            Model.TheGameIsOver += CloseTheGame;
             Model.TheGameIsOver += OpenTheMainMenu;
 
             PauseButton = new Button()
@@ -136,7 +101,7 @@ namespace MainWindow
 
             Paint += DrawingTheModel;
             Paint += DrawAGamePanel;
-            
+
             RecalculateTheValuesOfTheGameButtons("", new EventArgs());
             SizeChanged += RecalculateTheValuesOfTheGameButtons;
 
@@ -144,6 +109,26 @@ namespace MainWindow
             Click += Controller.ToShoot;
             KeyDown += Controller.MakeAMove;
             MouseWheel += Controller.RotateThePlayer;
+        }
+
+        public static void ChangeThePausePicture() => 
+            PauseButton.BackgroundImage = PauseButton.BackgroundImage == PauseImages[(int)Pause.TurnOn] ? 
+            PauseImages[(int)Pause.TurnOff] : PauseImages[(int)Pause.TurnOn];
+
+        public void CloseTheMainMenu()
+        {
+            Controls.Clear();
+            SizeChanged -= UpdateTheFieldsForTheMenu;
+            StartButton.Click -= StartTheGame;
+            BackgroundImage = null;
+            Paint -= DisplayARecord;
+        }
+
+        void UpdateTheFieldsForTheMenu(object sender, EventArgs e)
+        {
+            StartButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 16.3),
+                (int)(InitialCoordinateOfTheMap.Y + ImageSize * 11));
+            StartButton.Size = new Size() { Width = (int)(6 * ImageSize), Height = (int)(2 * ImageSize) };
         }
 
         void DrawAGamePanel(object sender, PaintEventArgs e)
@@ -183,6 +168,21 @@ namespace MainWindow
                         var coordinatesOnTheForm = RecalculateTheCoordinatesOnTheForm(new System.Drawing.Point(x, y));
                         e.Graphics.DrawImage(image, RotateAnArrayOfPoints(coordinatesOnTheForm, creture.AngleInDegrees * Math.PI / 180));
                     }
+        }
+
+        void DisplayARecord(object sender, PaintEventArgs e)
+        {
+            DrawTheText(e, File.ReadAllLines(@"..\..\Model\Record.txt").FirstOrDefault(), new RectangleF(
+                new PointF(InitialCoordinateOfTheMap.X + ImageSize * 7f, InitialCoordinateOfTheMap.Y + 3.5f * ImageSize),
+                new SizeF(10 * ImageSize, ImageSize * 1.34f)), Brushes.DarkRed, new StringFormat()
+                { Alignment = StringAlignment.Far }, ImageSize / 1.34f);
+
+            e.Graphics.DrawImage(Image.FromFile(@"..\..\Images\star.png"), new PointF[]
+            {
+                new PointF(InitialCoordinateOfTheMap.X + 17f * ImageSize, InitialCoordinateOfTheMap.Y + 3.4f * ImageSize),
+                new PointF(InitialCoordinateOfTheMap.X + 18f * ImageSize, InitialCoordinateOfTheMap.Y + 3.4f * ImageSize),
+                new PointF(InitialCoordinateOfTheMap.X + 17f * ImageSize, InitialCoordinateOfTheMap.Y + 4.4f * ImageSize)
+            });
         }
 
         void RecalculateTheValuesOfTheGameButtons(object sender, EventArgs e)
