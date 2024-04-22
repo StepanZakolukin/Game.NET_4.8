@@ -6,7 +6,8 @@ namespace WindowsForm.Model
 {
     public class Bot : Characters
     {
-        public Bot(Point location, string pathToTheFile = @"..\..\Images\Bot.png", int health = 1) : base(location, pathToTheFile, health)
+        public Bot(Point location, int angleInDegrees, string pathToTheFile = @"..\..\Images\Bot.png", int health = 1)
+            : base(location, pathToTheFile, health, angleInDegrees)
         {
         }
 
@@ -14,7 +15,7 @@ namespace WindowsForm.Model
         {
             if (!model.Map[model.Player.Location].Contains(model.Player)) return;
 
-            TurnToThePlayerAndShoot(model);
+            if (TryToExecuteAShotOrTurnAroundForAShot(model)) return;
 
             foreach(var followingLocation in FindAWay(model.Map, model.Player.Location, Walker.OfSets
                 .Select(ofset => Location + ofset)
@@ -72,8 +73,9 @@ namespace WindowsForm.Model
 
         public override bool DeadInConflict(GameObjects gameObjects) => !(gameObjects is Stone || gameObjects == this);
 
-        void TurnToThePlayerAndShoot(GameModel model)
+        bool TryToExecuteAShotOrTurnAroundForAShot(GameModel model)
         {
+            var actionIsCompleted = false;
             var distance = Location - model.Player.Location;
 
             if (distance.Y < 0 && distance.X == 0 && Enumerable.Range(Location.Y + 1,
@@ -82,6 +84,7 @@ namespace WindowsForm.Model
                 if (AngleInDegrees == 0 || AngleInDegrees == 270) AngleInDegrees += 90;
                 else if (AngleInDegrees == 180) AngleInDegrees += 270;
                 else Shoot(model);
+                actionIsCompleted = true;
             }
             else if (distance.Y > 0 && distance.X == 0 && Enumerable.Range(model.Player.Location.Y + 1,
                 distance.Y - 1).All(y => model.Map[Location.X, y].All(creature => !(creature is Wall) && !(creature is Bot))))
@@ -89,6 +92,7 @@ namespace WindowsForm.Model
                 if (AngleInDegrees == 0) AngleInDegrees += 270;
                 else if (AngleInDegrees == 90 || AngleInDegrees == 180) AngleInDegrees += 90;
                 else Shoot(model);
+                actionIsCompleted = true;
             }
             else if (distance.X < 0 && distance.Y == 0 && Enumerable.Range(Location.X + 1,
                 Math.Abs(distance.X) - 1).All(x => model.Map[x, Location.Y].All(creature => !(creature is Wall) && !(creature is Bot))))
@@ -96,6 +100,7 @@ namespace WindowsForm.Model
                 if (AngleInDegrees == 90) AngleInDegrees += 270;
                 else if (AngleInDegrees == 180 || AngleInDegrees == 270) AngleInDegrees += 90;
                 else Shoot(model);
+                actionIsCompleted = true;
             }
             else if (distance.X > 0 && distance.Y == 0 && Enumerable.Range(model.Player.Location.X + 1,
                 distance.X - 1).All(x => model.Map[x, Location.Y].All(creature => !(creature is Wall) && !(creature is Bot))))
@@ -103,9 +108,12 @@ namespace WindowsForm.Model
                 if (AngleInDegrees == 0 || AngleInDegrees == 90) AngleInDegrees += 90;
                 else if (AngleInDegrees == 270) AngleInDegrees += 270;
                 else Shoot(model);
+                actionIsCompleted = true;
             }
 
             AngleInDegrees %= 360;
+
+            return actionIsCompleted;
         }
     }
 }

@@ -88,12 +88,17 @@ namespace WindowsForm.Model
             return sortedСreatures.Where(creature => !sortedСreatures.Last().DeadInConflict(creature)).ToList();
         }
 
-        public void CreateABot()
+        public void CreateBots(int quantity)
         {
-            var location = FindAPositionToCreateAnOject();
-            Map[location].Add(new Bot(location));
-            ArmyOfBots.Add((Bot)Map[location].Last());
-            numberOfBots++;
+            var random = new Random();
+
+            for (var i = 0; i < quantity; i++)
+            {
+                var location = FindAPositionToCreateAnOject();
+                Map[location].Add(new Bot(location, random.Next(1, 5) * 90));
+                ArmyOfBots.Add((Bot)Map[location].Last());
+                numberOfBots++;
+            }
         }
 
         public void SetTheBotsInMotion(GameModel model)

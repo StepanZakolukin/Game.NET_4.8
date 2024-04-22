@@ -10,12 +10,12 @@ namespace WindowsForm.Model
         public Point Location { get; protected set; }
         public Point Delta { get; protected set; }
         public int Health { get; protected set; }
-        public GameObjects(Point location, string pathToTheFile, int health, int priority = 0)
+        public GameObjects(Point location, string pathToTheFile, int health, int priority = 0, int angleInDegrees = 90)
         {
             Picture = Image.FromFile(pathToTheFile);
             Location = location;
             Delta = new Point(0, 0);
-            AngleInDegrees = 90;
+            AngleInDegrees = angleInDegrees;
             Health = health;
             Priority = priority;
         }
