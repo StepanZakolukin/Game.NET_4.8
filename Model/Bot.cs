@@ -59,6 +59,8 @@ namespace WindowsForm.Model
 
         private bool CheckIfThePositionIsAvailable(Point location, GameModel model)
         {
+            if (location == model.Player.Location + model.Player.Delta) return false;
+
             foreach (var bot in model.ArmyOfBots)
             {
                 if (bot == this) break;
@@ -77,47 +79,33 @@ namespace WindowsForm.Model
             if (distance.Y < 0 && distance.X == 0 && Enumerable.Range(Location.Y + 1,
                 Math.Abs(distance.Y) - 1).All(y => model.Map[Location.X, y].All(creature => !(creature is Wall) && !(creature is Bot))))
             {
-                switch (AngleInDegrees % 360)
-                {
-                    case 0: AngleInDegrees += 90; break;
-                    case 180: AngleInDegrees += 270; break;
-                    case 270: AngleInDegrees += 180; break;
-                }
-                Shoot(model); return;
+                if (AngleInDegrees == 0 || AngleInDegrees == 270) AngleInDegrees += 90;
+                else if (AngleInDegrees == 180) AngleInDegrees += 270;
+                else Shoot(model);
             }
             else if (distance.Y > 0 && distance.X == 0 && Enumerable.Range(model.Player.Location.Y + 1,
                 distance.Y - 1).All(y => model.Map[Location.X, y].All(creature => !(creature is Wall) && !(creature is Bot))))
             {
-                switch (AngleInDegrees % 360)
-                {
-                    case 0: AngleInDegrees += 270; break;
-                    case 90: AngleInDegrees += 180; break;
-                    case 180: AngleInDegrees += 90; break;
-                }
-                Shoot(model); return;
+                if (AngleInDegrees == 0) AngleInDegrees += 270;
+                else if (AngleInDegrees == 90 || AngleInDegrees == 180) AngleInDegrees += 90;
+                else Shoot(model);
             }
             else if (distance.X < 0 && distance.Y == 0 && Enumerable.Range(Location.X + 1,
                 Math.Abs(distance.X) - 1).All(x => model.Map[x, Location.Y].All(creature => !(creature is Wall) && !(creature is Bot))))
             {
-                switch (AngleInDegrees % 360)
-                {
-                    case 90: AngleInDegrees += 270; break;
-                    case 180: AngleInDegrees += 180; break;
-                    case 270: AngleInDegrees += 90; break;
-                }
-                Shoot(model); return;
+                if (AngleInDegrees == 90) AngleInDegrees += 270;
+                else if (AngleInDegrees == 180 || AngleInDegrees == 270) AngleInDegrees += 90;
+                else Shoot(model);
             }
             else if (distance.X > 0 && distance.Y == 0 && Enumerable.Range(model.Player.Location.X + 1,
                 distance.X - 1).All(x => model.Map[x, Location.Y].All(creature => !(creature is Wall) && !(creature is Bot))))
             {
-                switch (AngleInDegrees % 360)
-                {
-                    case 0: AngleInDegrees += 180; break;
-                    case 90: AngleInDegrees += 90; break;
-                    case 270: AngleInDegrees += 270; break;
-                }
-                Shoot(model); return;
+                if (AngleInDegrees == 0 || AngleInDegrees == 90) AngleInDegrees += 90;
+                else if (AngleInDegrees == 270) AngleInDegrees += 270;
+                else Shoot(model);
             }
+
+            AngleInDegrees %= 360;
         }
     }
 }

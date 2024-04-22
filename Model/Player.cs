@@ -9,9 +9,17 @@ namespace WindowsForm.Model
             AngleInDegrees = angleInDegrees;
         }
 
-        public void TurnLeft() => AngleInDegrees += 270;
+        public void TurnLeft()
+        {
+            AngleInDegrees += 270;
+            AngleInDegrees %= 360;
+        }
 
-        public void TurnRight() => AngleInDegrees += 90;
+        public void TurnRight()
+        {
+            AngleInDegrees += 90;
+            AngleInDegrees %= 360;
+        }
 
         public void GoBack(GameModel model)
         {

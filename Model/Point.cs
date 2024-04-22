@@ -1,4 +1,6 @@
-﻿namespace WindowsForm.Model
+﻿using System;
+
+namespace WindowsForm.Model
 {
     public struct Point
     {

@@ -3,8 +3,6 @@ using System.Drawing;
 using System.Windows.Forms;
 using WindowsForm.Model;
 using WindowsForm.Controller;
-using System.IO;
-using System.Linq;
 
 namespace MainWindow
 {
@@ -55,7 +53,13 @@ namespace MainWindow
                 BackgroundImage = Image.FromFile(@"..\..\Images\StartTheGame.png"),
                 BackgroundImageLayout = ImageLayout.Zoom,
                 BackColor = Color.FromArgb(0, 0, 0, 0),
+                FlatStyle = FlatStyle.Flat
             };
+            StartButton.FlatAppearance.BorderColor = Color.DarkRed;
+            StartButton.FlatAppearance.BorderSize = 4;
+            StartButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
+            StartButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(50, 0, 0, 0);
+
             Controls.Add(StartButton);
 
             UpdateTheFieldsForTheMenu("", new EventArgs());
@@ -65,19 +69,14 @@ namespace MainWindow
             Paint += DisplayARecord; 
         }
 
-        void CloseTheGame()
+        void EraseThePlayingField()
         {
-            Controls.Clear();
-            PauseButton.Click -= Controller.PutItOnPause;
-
-            Click -= Controller.ToShoot;
-            KeyDown -= Controller.MakeAMove;
-            MouseWheel -= Controller.RotateThePlayer;
             Paint -= DrawingTheModel;
             Paint -= DrawAGamePanel;
+
+            Controls.Clear();
             SizeChanged -= RecalculateTheValuesOfTheGameButtons;
             Model.StateChanged -= Invalidate;
-            Model.TheGameIsOver -= CloseTheGame;
             Model.TheGameIsOver -= OpenTheResultsWindow;
 
             Controller.StopTimers();
@@ -88,16 +87,16 @@ namespace MainWindow
             Model = new GameModel(new Playground());
             Controller = new Controller(Model);
             Model.StateChanged += Invalidate;
-            Model.TheGameIsOver += CloseTheGame;
             Model.TheGameIsOver += OpenTheResultsWindow;
 
             PauseButton = new Button()
             {
                 BackColor = Color.FromArgb(0, 0, 0, 0),
                 BackgroundImage = PauseImages[(int)Pause.TurnOn],
-                BackgroundImageLayout = ImageLayout.Zoom
+                BackgroundImageLayout = ImageLayout.Zoom,
+                FlatStyle = FlatStyle.Flat
             };
-
+            PauseButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
             Controls.Add(PauseButton);
 
             Paint += DrawingTheModel;
@@ -134,6 +133,9 @@ namespace MainWindow
 
         void OpenTheResultsWindow()
         {
+            DeactivateGameControls();
+            Controller.PutItOnPause("", new EventArgs());
+
             Paint += DrawTheResultsWindow;
 
             ButtonToGoToTheMenu = new Button()
@@ -141,13 +143,25 @@ namespace MainWindow
                 BackgroundImage = Image.FromFile(@"..\..\Images\ButtonToGoToTheMenu.png"),
                 BackgroundImageLayout = ImageLayout.Zoom,
                 BackColor = Color.FromArgb(0, 0, 0, 0),
+                FlatStyle = FlatStyle.Flat
             };
+            ButtonToGoToTheMenu.FlatAppearance.BorderColor = Color.DarkRed;
+            ButtonToGoToTheMenu.FlatAppearance.BorderSize = 4;
+            ButtonToGoToTheMenu.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
             Controls.Add(ButtonToGoToTheMenu);
 
             UpdateTheCoordinatesOfTheMenuTransitionButton("", new EventArgs());
 
             SizeChanged += UpdateTheCoordinatesOfTheMenuTransitionButton;
             ButtonToGoToTheMenu.Click += ReturnToTheMenu;
+        }
+
+        void DeactivateGameControls()
+        {
+            PauseButton.Click -= Controller.PutItOnPause;
+            Click -= Controller.ToShoot;
+            KeyDown -= Controller.MakeAMove;
+            MouseWheel -= Controller.RotateThePlayer;
         }
 
         void CloseTheResultsWindow()
@@ -160,41 +174,82 @@ namespace MainWindow
 
         void ReturnToTheMenu(object sender, EventArgs e)
         {
+            EraseThePlayingField();
             CloseTheResultsWindow();
             OpenTheMainMenu();
         }
 
         void DrawTheResultsWindow(object sender, PaintEventArgs e)
         {
-            e.Graphics.DrawImage(Image.FromFile(@"..\..\Images\ResultsWindow.png"), new PointF[]
+            DrawTheBackgroundOfTheResultsWindow(e.Graphics);
+
+            DrawAnAsterisk(new PointF(InitialCoordinateOfTheMap.X + 20 * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 8.65f),
+                new SizeF(ImageSize * 0.7f, ImageSize * 0.7f), e.Graphics);
+
+            DrawTheText(e, "Игра завершена.",
+                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + 8 * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 4.5f),
+                new SizeF(16 * ImageSize, ImageSize * 1.5f)), Brushes.White, new StringFormat() { Alignment = StringAlignment.Center }, ImageSize / 1.2f);
+
+            if (Model.RecordHasBeenUpdated)
+                DrawTheText(e, "Вы обновили рекорд!",
+                    new RectangleF(new PointF(InitialCoordinateOfTheMap.X + 8 * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 6f),
+                    new SizeF(16 * ImageSize, ImageSize * 1.5f)), Brushes.Red, new StringFormat() { Alignment = StringAlignment.Center }, ImageSize / 1.2f);
+
+            DrawTheText(e, String.Format("{0, -7} {1, 6}", "Счёт:",  Model.NumberOfPoints),
+                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 10.7f, InitialCoordinateOfTheMap.Y + 7.5f * ImageSize),
+                new SizeF(12 * ImageSize, ImageSize)), Brushes.White, new StringFormat() { Alignment = StringAlignment.Near }, ImageSize / 1.34f);
+
+            DrawTheText(e, String.Format("{0, -7} {1, 6}", "Рекорд:", Model.Record),
+                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 10.7f, InitialCoordinateOfTheMap.Y + 8.5f * ImageSize),
+                new SizeF(12 * ImageSize, ImageSize)), Brushes.White, new StringFormat() { Alignment = StringAlignment.Near }, ImageSize / 1.34f);
+
+            DrawAnAsterisk(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 20f, InitialCoordinateOfTheMap.Y + 7.65f * ImageSize),
+                new SizeF(ImageSize * 0.7f, ImageSize * 0.7f), e.Graphics);
+        }
+
+        void DrawTheBackgroundOfTheResultsWindow(Graphics graphics)
+        {
+            graphics.DrawImage(Image.FromFile(@"..\..\Images\haze.png"), new PointF[]
             {
-                new PointF(InitialCoordinateOfTheMap.X + 6 * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 1),
-                new PointF(InitialCoordinateOfTheMap.X + 26 * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 1),
-                new PointF(InitialCoordinateOfTheMap.X + 6 * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 16)
+                new PointF(0, 0),
+                new PointF(ClientSize.Width, 0),
+                new PointF(0, ClientSize.Height)
             });
 
-            DrawTheText(e, Model.RecordHasBeenUpdated ? $"Вы обновили рекорд. Игра была завершена со счётом {Model.NumberOfPoints}" : $"Игра была завершена со счётом {Model.NumberOfPoints}",
-                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 9.5f, InitialCoordinateOfTheMap.Y + 5 * ImageSize),
-                new SizeF(12 * ImageSize, 5 * ImageSize)), Brushes.Black, new StringFormat() { Alignment = StringAlignment.Center }, ImageSize / 1.2f);
+            graphics.DrawImage(Image.FromFile(@"..\..\Images\ResultsWindow.png"), new PointF[]
+            {
+                new PointF(InitialCoordinateOfTheMap.X + 9 * ImageSize, InitialCoordinateOfTheMap.X + 3 * ImageSize),
+                new PointF(InitialCoordinateOfTheMap.X + 23 * ImageSize, InitialCoordinateOfTheMap.X + 3 * ImageSize),
+                new PointF(InitialCoordinateOfTheMap.X + 9 * ImageSize, InitialCoordinateOfTheMap.X + 13 * ImageSize),
+            });
         }
 
         void DrawAGamePanel(object sender, PaintEventArgs e)
         {
-            DrawTheText(e, $"Счёт: {Model.NumberOfPoints}",
-                new RectangleF(new PointF(InitialCoordinateOfTheMap.X, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f),
-                new SizeF(InitialCoordinateOfTheMap.X + 6 * ImageSize, ImageSize)), Brushes.White, new StringFormat(), ImageSize / 2);
-
             DrawTheText(e, $"Рекорд: {Model.Record}",
-                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 7, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f),
-                new SizeF(InitialCoordinateOfTheMap.X + 6 * ImageSize, ImageSize)), Brushes.White, new StringFormat()
+                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + 22f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f),
+                new SizeF(6 * ImageSize, ImageSize)), Brushes.White, new StringFormat() { Alignment = StringAlignment.Far}, ImageSize / 2);
+
+            DrawAnAsterisk(new PointF(InitialCoordinateOfTheMap.X + 28.2f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize * 0.7f),
+                new SizeF(ImageSize * 0.7f, ImageSize * 0.7f), e.Graphics);
+
+            DrawTheText(e, $"Счёт: {Model.NumberOfPoints}",
+                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 10f, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f),
+                new SizeF(6 * ImageSize, ImageSize)), Brushes.White, new StringFormat()
                 { Alignment = StringAlignment.Far}, ImageSize / 2);
 
-            e.Graphics.DrawImage(Image.FromFile(@"..\..\Images\star.png"), new PointF[]
+            DrawAnAsterisk(new PointF(InitialCoordinateOfTheMap.X + 16.2f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize * 0.7f),
+                new SizeF(0.7f * ImageSize, 0.7f * ImageSize), e.Graphics);
+
+            for (var i = 0; i < Model.Player.Health; i++)
             {
-                new PointF(InitialCoordinateOfTheMap.X + 14.5f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize * 0.7f),
-                new PointF(InitialCoordinateOfTheMap.X + 15.2f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize * 0.7f),
-                new PointF(InitialCoordinateOfTheMap.X + 14.5f * ImageSize, InitialCoordinateOfTheMap.Y)
-            });
+                e.Graphics.DrawImage(Image.FromFile(@"..\..\Images\heart.png"), new PointF[]
+                {
+                    new PointF(InitialCoordinateOfTheMap.X + i * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize * 0.7f),
+                    new PointF(InitialCoordinateOfTheMap.X + i * ImageSize + 0.7f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize * 0.7f),
+                    new PointF(InitialCoordinateOfTheMap.X + i * ImageSize, InitialCoordinateOfTheMap.Y)
+                });
+            }
         }
 
         void DrawTheText(PaintEventArgs e, string text, RectangleF location, Brush brushes, StringFormat format, float fontSize)
@@ -219,16 +274,21 @@ namespace MainWindow
 
         void DisplayARecord(object sender, PaintEventArgs e)
         {
-            DrawTheText(e, File.ReadAllLines(@"..\..\Model\Record.txt").FirstOrDefault(), new RectangleF(
-                new PointF(InitialCoordinateOfTheMap.X + ImageSize * 7f, InitialCoordinateOfTheMap.Y + 3.5f * ImageSize),
+            DrawTheText(e, $"Рекорд: {Model.Record}", new RectangleF(
+                new PointF(InitialCoordinateOfTheMap.X + ImageSize * 10f, InitialCoordinateOfTheMap.Y + 3.5f * ImageSize),
                 new SizeF(10 * ImageSize, ImageSize * 1.34f)), Brushes.DarkRed, new StringFormat()
                 { Alignment = StringAlignment.Far }, ImageSize / 1.34f);
 
-            e.Graphics.DrawImage(Image.FromFile(@"..\..\Images\star.png"), new PointF[]
+            DrawAnAsterisk(new PointF(InitialCoordinateOfTheMap.X + 20f * ImageSize, InitialCoordinateOfTheMap.Y + 3.4f * ImageSize), new SizeF(ImageSize, ImageSize), e.Graphics);
+        }
+
+        void DrawAnAsterisk(PointF location, SizeF size, Graphics graphics)
+        {
+            graphics.DrawImage(Image.FromFile(@"..\..\Images\star.png"), new PointF[]
             {
-                new PointF(InitialCoordinateOfTheMap.X + 17f * ImageSize, InitialCoordinateOfTheMap.Y + 3.4f * ImageSize),
-                new PointF(InitialCoordinateOfTheMap.X + 18f * ImageSize, InitialCoordinateOfTheMap.Y + 3.4f * ImageSize),
-                new PointF(InitialCoordinateOfTheMap.X + 17f * ImageSize, InitialCoordinateOfTheMap.Y + 4.4f * ImageSize)
+                location,
+                new PointF(location.X + size.Width, location.Y),
+                new PointF(location.X, location.Y + size.Height)
             });
         }
 
@@ -241,7 +301,7 @@ namespace MainWindow
 
         void UpdateTheCoordinatesOfTheMenuTransitionButton(object sender, EventArgs e)
         {
-            ButtonToGoToTheMenu.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 13),
+            ButtonToGoToTheMenu.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 13.5f),
                 (int)(InitialCoordinateOfTheMap.Y + ImageSize * 10.3));
             ButtonToGoToTheMenu.Size = new Size() { Width = (int)(5 * ImageSize), Height = (int)(2 * ImageSize) };
         }
