@@ -16,6 +16,7 @@ namespace MainWindow
         private static Image[] PauseImages { get; set; }
         private Button StartButton { get; set; }
         private Button ButtonToGoToTheMenu { get; set; }
+        private Button RestartGameButton { get; set; }
         public MyForm(GameModel model)
         {
             Model = model;
@@ -89,6 +90,36 @@ namespace MainWindow
             Model.StateChanged += Invalidate;
             Model.TheGameIsOver += OpenTheResultsWindow;
 
+            CreateGamePanelButtons();
+
+            Paint += DrawingTheModel;
+            Paint += DrawAGamePanel;
+
+            RecalculateTheValuesOfTheGameButtons("", new EventArgs());
+            SizeChanged += RecalculateTheValuesOfTheGameButtons;
+
+            ActivateTheGameControls();
+        }
+
+        void RestartTheGame(object sender, EventArgs e)
+        {
+            EraseThePlayingField();
+            DeactivateGameControls();
+            OpenTheGame();
+            Controller.ActivateTimers();
+        }
+
+        void ActivateTheGameControls()
+        {
+            PauseButton.Click += Controller.PutItOnPause;
+            Click += Controller.ToShoot;
+            KeyDown += Controller.MakeAMove;
+            MouseWheel += Controller.RotateThePlayer;
+            RestartGameButton.Click += RestartTheGame;
+        }
+
+        void CreateGamePanelButtons()
+        {
             PauseButton = new Button()
             {
                 BackColor = Color.FromArgb(0, 0, 0, 0),
@@ -97,18 +128,19 @@ namespace MainWindow
                 FlatStyle = FlatStyle.Flat
             };
             PauseButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
+            PauseButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 255, 255, 255);
             Controls.Add(PauseButton);
 
-            Paint += DrawingTheModel;
-            Paint += DrawAGamePanel;
-
-            RecalculateTheValuesOfTheGameButtons("", new EventArgs());
-            SizeChanged += RecalculateTheValuesOfTheGameButtons;
-
-            PauseButton.Click += Controller.PutItOnPause;
-            Click += Controller.ToShoot;
-            KeyDown += Controller.MakeAMove;
-            MouseWheel += Controller.RotateThePlayer;
+            RestartGameButton = new Button()
+            {
+                BackColor = Color.FromArgb(0, 0, 0, 0),
+                BackgroundImage = Image.FromFile(@"..\..\Images\RestartGameButton.png"),
+                BackgroundImageLayout = ImageLayout.Zoom,
+                FlatStyle = FlatStyle.Flat
+            };
+            RestartGameButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
+            RestartGameButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 255, 255, 255);
+            Controls.Add(RestartGameButton);
         }
 
         public static void ChangeThePausePicture() => 
@@ -133,8 +165,10 @@ namespace MainWindow
 
         void OpenTheResultsWindow()
         {
+            Controller.StopTimers();
+            PauseButton.Enabled = false;
+            RestartGameButton.Enabled = false;
             DeactivateGameControls();
-            Controller.PutItOnPause("", new EventArgs());
 
             Paint += DrawTheResultsWindow;
 
@@ -159,6 +193,7 @@ namespace MainWindow
         void DeactivateGameControls()
         {
             PauseButton.Click -= Controller.PutItOnPause;
+            RestartGameButton.Click -= RestartTheGame;
             Click -= Controller.ToShoot;
             KeyDown -= Controller.MakeAMove;
             MouseWheel -= Controller.RotateThePlayer;
@@ -297,6 +332,10 @@ namespace MainWindow
             PauseButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * (Model.Map.Width - 1)),
                 (int)(InitialCoordinateOfTheMap.Y - ImageSize));
             PauseButton.Size = new Size((int)ImageSize, (int)ImageSize);
+
+            RestartGameButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * (Model.Map.Width - 2)),
+                (int)(InitialCoordinateOfTheMap.Y - ImageSize));
+            RestartGameButton.Size = PauseButton.Size;
         }
 
         void UpdateTheCoordinatesOfTheMenuTransitionButton(object sender, EventArgs e)

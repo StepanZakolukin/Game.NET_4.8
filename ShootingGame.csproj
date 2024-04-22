@@ -105,6 +105,7 @@
     <Content Include="Images\PauseTurnOff.png" />
     <Content Include="Images\PauseTurnOn.png" />
     <Content Include="Images\Player.png" />
+    <Content Include="Images\RestartGameButton.png" />
     <Content Include="Images\ResultsWindow.png" />
     <Content Include="Images\star.png" />
     <Content Include="Images\StartTheGame.png" />
