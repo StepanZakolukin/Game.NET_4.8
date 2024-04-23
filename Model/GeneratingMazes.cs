@@ -27,15 +27,12 @@ namespace WindowsForm.Model
             if (nestingLevel % 2 == 0)
             {
                 var x = startX + (endX - startX + 1) / 2;
-                var YCoordinateOfThePassage = new Random().Next(startY, endY + 1);
 
                 for (var y = startY; y <= endY; y++)
                     matrix[x, y] = "1";
 
-                while (x % 4 == 0 && YCoordinateOfThePassage % 4 == 0)
-                    YCoordinateOfThePassage = new Random().Next(startY, endY + 1);
-
-                matrix[x, YCoordinateOfThePassage] = "0";
+                matrix[x, FindTheSecondCoordinateForThePassage(x, startY, (endY - startY + 1) / 2 + startY - 1)] = "0";
+                matrix[x, FindTheSecondCoordinateForThePassage(x, (endY - startY + 1) / 2 + startY + 1, endY)] = "0";
 
                 CreatingWalls(matrix, nestingLevel + 1, startX, x - 1, startY, endY);
                 CreatingWalls(matrix, nestingLevel + 1, x + 1, endX, startY, endY);
@@ -43,19 +40,27 @@ namespace WindowsForm.Model
             else
             {
                 var y = startY + (endY - startY + 1) / 2;
-                var XCoordinateOfThePassage = new Random().Next(startX, endX + 1);
 
                 for (var x = startX; x <= endX; x++)
                     matrix[x, y] = "1";
 
-                while (y % 4 == 0 && XCoordinateOfThePassage % 4 == 0)
-                    XCoordinateOfThePassage = new Random().Next(startX, endX + 1);
-
-                matrix[XCoordinateOfThePassage, y] = "0";
+                matrix[FindTheSecondCoordinateForThePassage(y, startX, (endX - startX + 1) / 2 + startX - 1), y] = "0";
+                matrix[FindTheSecondCoordinateForThePassage(y, (endX - startX + 1) / 2 + startX + 1, endX), y] = "0";
 
                 CreatingWalls(matrix, nestingLevel + 1, startX, endX, startY, y - 1);
                 CreatingWalls(matrix, nestingLevel + 1, startX, endX, y + 1, endY);
             }
+        }
+
+        static int FindTheSecondCoordinateForThePassage(int coordinate1, int start, int end)
+        {
+            var random = new Random();
+            var coordinate2 = random.Next(start, end + 1);
+
+            while (coordinate1 % 4 == 0 && coordinate2 % 4 == 0)
+                coordinate2 = random.Next(start, end + 1);
+
+            return coordinate2;
         }
     }
 }
