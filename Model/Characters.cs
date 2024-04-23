@@ -2,7 +2,7 @@
 {
     public class Characters : GameObjects
     {
-        public Characters(Point location, string pathToTheFile, int health, int angleInDegrees = 90) : base(location, pathToTheFile, health, 1, angleInDegrees)
+        public Characters(Point location, string pathToTheFile, int health, int angleInDegrees) : base(location, pathToTheFile, health, 1, angleInDegrees)
         {
         }
 

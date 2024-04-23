@@ -7,20 +7,34 @@ namespace WindowsForm.Model
 {
     public class Playground
     {
+        private readonly Func<string[,]>[] Maps;
         public List<GameObjects>[,] Map;
         public readonly int Height;
         public readonly int Width;
 
-        public Playground(string pathToTheFile = @"..\..\Model\Map.txt") 
+        public Playground() 
         {
-            //var wallMap = File.ReadAllText(pathToTheFile).Split('\n')
-            //    .Select(st => st.Split('\t'))
-            //    .ToArray();
-
             Height = 17;
             Width = 32;
-            
-            CreateMap(GeneratingMazes.GenerateAMaze(Width, Height));
+
+            Maps = new Func<string[,]>[] { () => GeneratingMazes.GenerateAMaze(Width, Height), GetAMapFromAFile };
+
+            CreateMap(Maps[new Random().Next(0, 2)]());
+        }
+
+        string[,] GetAMapFromAFile()
+        {
+            var result = new string[Width, Height];
+
+            var map = File.ReadAllText(@"..\..\Model\Map.txt").Split('\n')
+                .Select(st => st.Split('\t'))
+                .ToArray();
+
+            for (var x = 0; x < Width; x++)
+                for (var y = 0; y < Height; y++)
+                    result[x, y] = map[y][x];
+
+            return result;
         }
 
         private void CreateMap(string[,] array)

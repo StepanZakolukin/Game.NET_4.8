@@ -4,9 +4,8 @@ namespace WindowsForm.Model
 {
     public class Player : Characters
     {
-        public Player(int angleInDegrees, Point location, string pathToTheFile = @"..\..\Images\Player.png", int health = 3) : base(location, pathToTheFile, health)
+        public Player(int angleInDegrees, Point location, string pathToTheFile = @"..\..\Images\Player.png", int health = 3) : base(location, pathToTheFile, health, angleInDegrees)
         {
-            AngleInDegrees = angleInDegrees;
         }
 
         public void TurnLeft()

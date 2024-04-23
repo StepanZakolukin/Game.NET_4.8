@@ -21,7 +21,7 @@ namespace WindowsForm.Model
         {
             Map = map;
             var playerLocation = FindAPositionToCreateAnOject();
-            Map[playerLocation].Add(new Player(90, playerLocation));
+            Map[playerLocation].Add(new Player(new Random().Next(1, 5) * 90, playerLocation));
             Player = (Player)Map[playerLocation].Last();
             ArmyOfBots = new List<Bot>();
 
