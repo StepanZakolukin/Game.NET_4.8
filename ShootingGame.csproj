@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Model\Bot.cs" />
     <Compile Include="Model\Characters.cs" />
+    <Compile Include="Model\FirstAid.cs" />
     <Compile Include="Model\GameObjects.cs" />
     <Compile Include="Model\GeneratingMazes.cs" />
     <Compile Include="Model\Go.cs" />

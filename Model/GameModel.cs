@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace WindowsForm.Model
 {
@@ -24,6 +25,8 @@ namespace WindowsForm.Model
             Map[playerLocation].Add(new Player(new Random().Next(1, 5) * 90, playerLocation));
             Player = (Player)Map[playerLocation].Last();
             ArmyOfBots = new List<Bot>();
+            var firstAidKit = new FirstAid(FindAPositionToCreateAnOject());
+            Map[firstAidKit.Location].Add(firstAidKit);
 
             var date = File.ReadAllLines(@"..\..\Model\Record.txt").FirstOrDefault();
             Record = date == null ? 0 : int.Parse(date);
@@ -43,6 +46,7 @@ namespace WindowsForm.Model
                 for (var y = 0; y < Map.Height; y++)
                     foreach(var creature in Map[x, y])
                     {
+                        if (creature.Health < 1) continue;
                         var targetLogicalLocation = creature.Location + creature.Delta;
                         creatures[targetLogicalLocation.X, targetLogicalLocation.Y].Add(creature);
                     }
@@ -73,19 +77,23 @@ namespace WindowsForm.Model
             if (!Map[Player.Location].Contains(Player)) TheGameIsOver();
         }
 
-        private static List<GameObjects> SelectWinnerCandidatePerLocation(List<GameObjects>[,] creatures, int x, int y)
+        private List<GameObjects> SelectWinnerCandidatePerLocation(List<GameObjects>[,] creatures, int x, int y)
         {
             var sortedСreatures = creatures[x, y].OrderBy(creature => creature.Priority).ToList();
 
-            if (sortedСreatures.Last() is Bullet && !sortedСreatures.All(creature => creature is Bullet || creature is Stone))
-            {
-                for (var i = 0; i < sortedСreatures.Count; i++)
-                    sortedСreatures[i].DeductDamage();
+            if (Player.Location + Player.Delta == new Point(x, y) && sortedСreatures.Any(creature => creature is FirstAid))
+                Player.Treat();
 
-                return sortedСreatures.Where(creature => creature.Health != 0).ToList();
-            }
+            for (var j = 1; j < sortedСreatures.Count; j++)
+                for (var i = 0; i < sortedСreatures.Count - j; i++)
+                    if (sortedСreatures[sortedСreatures.Count - j].DeadInConflict(sortedСreatures[i]))
+                    {
+                        sortedСreatures[i].DeductDamage();
+                        if (sortedСreatures[i].DeadInConflict(sortedСreatures[sortedСreatures.Count - j]))
+                            sortedСreatures[sortedСreatures.Count - j].DeductDamage();
+                    }
 
-            return sortedСreatures.Where(creature => !sortedСreatures.Last().DeadInConflict(creature)).ToList();
+            return sortedСreatures.OrderBy(creature => creature.RenderingPriority).ToList();
         }
 
         public void CreateBots(int quantity)
@@ -99,6 +107,13 @@ namespace WindowsForm.Model
                 ArmyOfBots.Add((Bot)Map[location].Last());
                 numberOfBots++;
             }
+        }
+
+        public void CreateAFirstAidKit()
+        {
+            var location = FindAPositionToCreateAnOject();
+
+            Map[location].Add(new FirstAid(location));
         }
 
         public void SetTheBotsInMotion(GameModel model)

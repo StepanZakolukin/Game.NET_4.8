@@ -8,6 +8,11 @@ namespace WindowsForm.Model
         {
         }
 
+        public void Treat() => Health = Health < 4 ? Health + 1 : Health;
+
+        public override bool DeadInConflict(GameObjects gameObjects) 
+            => !(gameObjects is Stone || gameObjects == this || gameObjects is Bot);
+
         public void TurnLeft()
         {
             AngleInDegrees += 270;

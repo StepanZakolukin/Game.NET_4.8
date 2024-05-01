@@ -24,6 +24,7 @@ namespace WindowsForm.Controller
 
             BotCreationTimer = new Timer();
             BotCreationTimer.Interval = 8000;
+            BotCreationTimer.Tick += (object sender, EventArgs args) => Model.CreateAFirstAidKit();
             BotCreationTimer.Tick += (object sender, EventArgs args) => Model.CreateBots(2);
             BotCreationTimer.Start();
 

@@ -11,6 +11,8 @@ namespace WindowsForm.Model
         {
         }
 
+        public override bool DeadInConflict(GameObjects gameObjects) => !(gameObjects is Stone || gameObjects == this);
+
         public void MakeAMove(GameModel model)
         {
             if (!model.Map[model.Player.Location].Contains(model.Player)) return;
@@ -70,8 +72,6 @@ namespace WindowsForm.Model
 
             return true;
         }
-
-        public override bool DeadInConflict(GameObjects gameObjects) => !(gameObjects is Stone || gameObjects == this);
 
         bool TryToExecuteAShotOrTurnAroundForAShot(GameModel model)
         {

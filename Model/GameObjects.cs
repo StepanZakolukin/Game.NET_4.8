@@ -10,7 +10,8 @@ namespace WindowsForm.Model
         public Point Location { get; protected set; }
         public Point Delta { get; protected set; }
         public int Health { get; protected set; }
-        public GameObjects(Point location, string pathToTheFile, int health, int priority = 0, int angleInDegrees = 90)
+        public readonly int RenderingPriority;
+        public GameObjects(Point location, string pathToTheFile, int health, int renderingPriority, int priority = 0, int angleInDegrees = 90)
         {
             Picture = Image.FromFile(pathToTheFile);
             Location = location;
@@ -18,9 +19,13 @@ namespace WindowsForm.Model
             AngleInDegrees = angleInDegrees;
             Health = health;
             Priority = priority;
+            RenderingPriority = renderingPriority;
         }
 
-        public virtual void DeductDamage() => Health = Health;
+        public virtual void DeductDamage()
+        {
+        }
+
         public virtual void CommandAreExecuted(int x, int y) => Location = new Point(x, y);
 
         public virtual bool DeadInConflict(GameObjects gameObjects) => false;
