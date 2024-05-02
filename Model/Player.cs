@@ -29,7 +29,7 @@ namespace WindowsForm.Model
         {
             var neighbour = model.Map[Walker.OfSets[(int)Go.Back] + Location];
 
-            if (!neighbour.Any(creature => creature.DeadInConflict(this)))
+            if (neighbour.All(creature => creature is Mine || creature is Explosion || !creature.DeadInConflict(this)))
                 Delta = Walker.OfSets[(int)Go.Back];
         }
 
@@ -37,7 +37,7 @@ namespace WindowsForm.Model
         {
             var neighbour = model.Map[Walker.OfSets[(int)Go.Forwad] + Location];
 
-            if (!neighbour.Any(creature => creature.DeadInConflict(this)))
+            if (neighbour.All(creature => creature is Mine || creature is Explosion || !creature.DeadInConflict(this)))
                 Delta = Walker.OfSets[(int)Go.Forwad];
         }
 
@@ -45,7 +45,7 @@ namespace WindowsForm.Model
         {
             var neighbour = model.Map[Walker.OfSets[(int)Go.Left] + Location];
 
-            if (!neighbour.Any(creature => creature.DeadInConflict(this)))
+            if (neighbour.All(creature => creature is Mine || creature is Explosion || !creature.DeadInConflict(this)))
                 Delta = Walker.OfSets[(int)Go.Left];
         }
 
@@ -53,7 +53,7 @@ namespace WindowsForm.Model
         {
             var neighbour = model.Map[Walker.OfSets[(int)Go.Right] + Location];
 
-            if (!neighbour.Any(creature => creature.DeadInConflict(this)))
+            if (neighbour.All(creature => creature is Mine || creature is Explosion || !creature.DeadInConflict(this)))
                 Delta = Walker.OfSets[(int)Go.Right];
         }
     }

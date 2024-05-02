@@ -6,5 +6,7 @@
         {
             AngleInDegrees = 0;
         }
+
+        public override bool DeadInConflict(GameObjects gameObjects) => gameObjects is Explosion;
     }
 }

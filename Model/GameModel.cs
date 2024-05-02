@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 
 namespace WindowsForm.Model
 {
@@ -28,10 +27,21 @@ namespace WindowsForm.Model
             var firstAidKit = new FirstAid(FindAPositionToCreateAnOject());
             Map[firstAidKit.Location].Add(firstAidKit);
 
+            MineTheMap(10);
+
             var date = File.ReadAllLines(@"..\..\Model\Record.txt").FirstOrDefault();
             Record = date == null ? 0 : int.Parse(date);
 
             StateChanged += () => File.WriteAllText(@"..\..\Model\Record.txt", Record.ToString());
+        }
+
+        private void MineTheMap(int quantity)
+        {
+            for (var i = 0; i < quantity; i++)
+            {
+                var location = FindAPositionToCreateAnOject();
+                Map[location].Add(new Mine(location));
+            }
         }
 
         public List<GameObjects>[,] GetCandidatesPerLocation()
@@ -83,6 +93,11 @@ namespace WindowsForm.Model
 
             if (Player.Location + Player.Delta == new Point(x, y) && sortedСreatures.Any(creature => creature is FirstAid))
                 Player.Treat();
+
+            if (sortedСreatures.Any(creature => creature is Characters) && 
+                sortedСreatures
+                .Where(creature => creature is Mine)
+                .FirstOrDefault() is Mine mine) mine.BlowUp(sortedСreatures);
 
             for (var j = 1; j < sortedСreatures.Count; j++)
                 for (var i = 0; i < sortedСreatures.Count - j; i++)

@@ -1,4 +1,6 @@
-﻿namespace WindowsForm.Model
+﻿using System.Collections.Generic;
+
+namespace WindowsForm.Model
 {
     public class FirstAid : GameObjects
     {

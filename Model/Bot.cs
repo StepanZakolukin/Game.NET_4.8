@@ -11,7 +11,8 @@ namespace WindowsForm.Model
         {
         }
 
-        public override bool DeadInConflict(GameObjects gameObjects) => !(gameObjects is Stone || gameObjects == this);
+        public override bool DeadInConflict(GameObjects gameObjects) => 
+            !(gameObjects is Stone || gameObjects == this);
 
         public void MakeAMove(GameModel model)
         {
@@ -41,7 +42,7 @@ namespace WindowsForm.Model
             {
                 var point = queue.Dequeue();
 
-                if (!map.InBounds(point.Value) || map[point.Value].Any(creature => creature.DeadInConflict(this)))
+                if (!map.InBounds(point.Value) || !map[point.Value].All(creature => creature is Mine || creature is Explosion || !creature.DeadInConflict(this)))
                     continue;
 
                 if (startingPositions.Contains(point.Value)) yield return point;

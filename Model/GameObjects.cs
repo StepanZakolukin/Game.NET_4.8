@@ -1,11 +1,12 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 
 namespace WindowsForm.Model
 {
     public class GameObjects
     {
         public readonly int Priority;
-        public readonly Image Picture;
+        public Image Picture { get; protected set; }
         public int AngleInDegrees { get; protected set; }
         public Point Location { get; protected set; }
         public Point Delta { get; protected set; }

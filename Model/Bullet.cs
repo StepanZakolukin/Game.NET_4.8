@@ -1,4 +1,6 @@
-﻿namespace WindowsForm.Model
+﻿using System.Collections.Generic;
+
+namespace WindowsForm.Model
 {
     public class Bullet : GameObjects
     {
@@ -14,6 +16,6 @@
         public void Forward() => Delta = Walker.MovingForwad[AngleInDegrees % 360];
 
         public override bool DeadInConflict(GameObjects gameObjects)
-            => !(gameObjects is Bullet || gameObjects is Stone || gameObjects is FirstAid) ;
+            => !(gameObjects is Bullet || gameObjects is Stone || gameObjects is FirstAid || gameObjects is Mine);
     }
 }
