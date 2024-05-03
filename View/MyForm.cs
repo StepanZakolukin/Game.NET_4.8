@@ -17,6 +17,8 @@ namespace MainWindow
         private Button StartButton { get; set; }
         private Button ButtonToGoToTheMenu { get; set; }
         private Button RestartGameButton { get; set; }
+        private Button StartOverButton { get; set; }
+
         public MyForm(GameModel model)
         {
             Model = model;
@@ -109,6 +111,14 @@ namespace MainWindow
             Controller.ActivateTimers();
         }
 
+        void StartOver(object sender, EventArgs e)
+        {
+            EraseThePlayingField();
+            CloseTheResultsWindow();
+            OpenTheGame();
+            Controller.ActivateTimers();
+        }
+
         void ActivateTheGameControls()
         {
             PauseButton.Click += Controller.PutItOnPause;
@@ -170,8 +180,18 @@ namespace MainWindow
             RestartGameButton.Enabled = false;
             DeactivateGameControls();
 
+            InitializeTheButtonsInTheResultsMenu();
             Paint += DrawTheResultsWindow;
 
+            UpdateTheCoordinatesOfTheMenuTransitionButton("", new EventArgs());
+
+            SizeChanged += UpdateTheCoordinatesOfTheMenuTransitionButton;
+            ButtonToGoToTheMenu.Click += ReturnToTheMenu;
+            StartOverButton.Click += StartOver;
+        }
+
+        void InitializeTheButtonsInTheResultsMenu()
+        {
             ButtonToGoToTheMenu = new Button()
             {
                 BackgroundImage = Image.FromFile(@"..\..\Images\ButtonToGoToTheMenu.png"),
@@ -179,15 +199,22 @@ namespace MainWindow
                 BackColor = Color.FromArgb(0, 0, 0, 0),
                 FlatStyle = FlatStyle.Flat
             };
+            Controls.Add(ButtonToGoToTheMenu);
             ButtonToGoToTheMenu.FlatAppearance.BorderColor = Color.DarkRed;
             ButtonToGoToTheMenu.FlatAppearance.BorderSize = 4;
             ButtonToGoToTheMenu.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
-            Controls.Add(ButtonToGoToTheMenu);
 
-            UpdateTheCoordinatesOfTheMenuTransitionButton("", new EventArgs());
-
-            SizeChanged += UpdateTheCoordinatesOfTheMenuTransitionButton;
-            ButtonToGoToTheMenu.Click += ReturnToTheMenu;
+            StartOverButton = new Button()
+            {
+                BackgroundImage = Image.FromFile(@"..\..\Images\StartOver.png"),
+                BackgroundImageLayout = ImageLayout.Zoom,
+                BackColor = Color.FromArgb(0, 0, 0, 0),
+                FlatStyle = FlatStyle.Flat
+            };
+            Controls.Add(StartOverButton);
+            StartOverButton.FlatAppearance.BorderColor = Color.DarkRed;
+            StartOverButton.FlatAppearance.BorderSize = 4;
+            StartOverButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
         }
 
         void DeactivateGameControls()
@@ -201,10 +228,11 @@ namespace MainWindow
 
         void CloseTheResultsWindow()
         {
-            Paint -= DrawTheResultsWindow;
             Controls.Clear();
+            Paint -= DrawTheResultsWindow;
             SizeChanged -= UpdateTheCoordinatesOfTheMenuTransitionButton;
             ButtonToGoToTheMenu.Click -= ReturnToTheMenu;
+            StartOverButton.Click -= StartOver;
         }
 
         void ReturnToTheMenu(object sender, EventArgs e)
@@ -218,7 +246,7 @@ namespace MainWindow
         {
             DrawTheBackgroundOfTheResultsWindow(e.Graphics);
 
-            DrawAnAsterisk(new PointF(InitialCoordinateOfTheMap.X + 20 * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 8.65f),
+            DrawAnAsterisk(new PointF(InitialCoordinateOfTheMap.X + 20.8f * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 8.65f),
                 new SizeF(ImageSize * 0.7f, ImageSize * 0.7f), e.Graphics);
 
             DrawTheText(e, "Игра завершена.",
@@ -230,15 +258,15 @@ namespace MainWindow
                     new RectangleF(new PointF(InitialCoordinateOfTheMap.X + 8 * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 6f),
                     new SizeF(16 * ImageSize, ImageSize * 1.5f)), Brushes.Red, new StringFormat() { Alignment = StringAlignment.Center }, ImageSize / 1.2f);
 
-            DrawTheText(e, String.Format("{0, -7} {1, 6}", "Счёт:",  Model.NumberOfPoints),
-                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 10.7f, InitialCoordinateOfTheMap.Y + 7.5f * ImageSize),
+            DrawTheText(e, String.Format("{0, -7} {1, 8}", "Счёт:",  Model.NumberOfPoints),
+                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 10.3f, InitialCoordinateOfTheMap.Y + 7.5f * ImageSize),
                 new SizeF(12 * ImageSize, ImageSize)), Brushes.White, new StringFormat() { Alignment = StringAlignment.Near }, ImageSize / 1.34f);
 
-            DrawTheText(e, String.Format("{0, -7} {1, 6}", "Рекорд:", Model.Record),
-                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 10.7f, InitialCoordinateOfTheMap.Y + 8.5f * ImageSize),
+            DrawTheText(e, String.Format("{0, -7} {1, 8}", "Рекорд:", Model.Record),
+                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 10.3f, InitialCoordinateOfTheMap.Y + 8.5f * ImageSize),
                 new SizeF(12 * ImageSize, ImageSize)), Brushes.White, new StringFormat() { Alignment = StringAlignment.Near }, ImageSize / 1.34f);
 
-            DrawAnAsterisk(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 20f, InitialCoordinateOfTheMap.Y + 7.65f * ImageSize),
+            DrawAnAsterisk(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 20.8f, InitialCoordinateOfTheMap.Y + 7.65f * ImageSize),
                 new SizeF(ImageSize * 0.7f, ImageSize * 0.7f), e.Graphics);
         }
 
@@ -340,9 +368,13 @@ namespace MainWindow
 
         void UpdateTheCoordinatesOfTheMenuTransitionButton(object sender, EventArgs e)
         {
-            ButtonToGoToTheMenu.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 13.5f),
+            ButtonToGoToTheMenu.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 10.5f),
                 (int)(InitialCoordinateOfTheMap.Y + ImageSize * 10.3));
             ButtonToGoToTheMenu.Size = new Size() { Width = (int)(5 * ImageSize), Height = (int)(2 * ImageSize) };
+
+            StartOverButton.Size = ButtonToGoToTheMenu.Size;
+            StartOverButton.Location = new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + ImageSize * 16.5f),
+                (int)(InitialCoordinateOfTheMap.Y + ImageSize * 10.3));
         }
 
         void UpdateFieldValues(object sender, EventArgs e)

@@ -27,7 +27,7 @@ namespace WindowsForm.Model
             var firstAidKit = new FirstAid(FindAPositionToCreateAnOject());
             Map[firstAidKit.Location].Add(firstAidKit);
 
-            MineTheMap(10);
+            MineTheMap(15);
 
             var date = File.ReadAllLines(@"..\..\Model\Record.txt").FirstOrDefault();
             Record = date == null ? 0 : int.Parse(date);
