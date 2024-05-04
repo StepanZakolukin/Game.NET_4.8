@@ -3,6 +3,8 @@ using System.Drawing;
 using System.Windows.Forms;
 using WindowsForm.Model;
 using WindowsForm.Controller;
+using System.IO;
+using System.Linq;
 
 namespace MainWindow
 {
@@ -18,12 +20,21 @@ namespace MainWindow
         private Button ButtonToGoToTheMenu { get; set; }
         private Button RestartGameButton { get; set; }
         private Button StartOverButton { get; set; }
+        private readonly Button[,] RoundButtons;
+        private readonly EventHandler[,] LevelTriggerFunctions;
+        private int MaximumAvailableLevel;
 
         public MyForm(GameModel model)
         {
             Model = model;
             KeyPreview = true;
             DoubleBuffered = true;
+
+            RoundButtons = new Button[5, 10];
+            LevelTriggerFunctions = new EventHandler[RoundButtons.GetLength(0), RoundButtons.GetLength(1)];
+            var dataFromTheFile = File.ReadAllLines(@"..\..\Model\Record.txt").FirstOrDefault();
+            MaximumAvailableLevel = Math.Max(dataFromTheFile == null ? 0 : int.Parse(dataFromTheFile), 1);
+            FillInTheMatrixWithFunctions();
 
             BackColor = Color.Black;
             Size = new Size() { Height = 450, Width = 800 };
@@ -53,7 +64,7 @@ namespace MainWindow
 
             StartButton = new Button()
             {
-                BackgroundImage = Image.FromFile(@"..\..\Images\StartTheGame.png"),
+                BackgroundImage = Image.FromFile(@"..\..\Images\Play.png"),
                 BackgroundImageLayout = ImageLayout.Zoom,
                 BackColor = Color.FromArgb(0, 0, 0, 0),
                 FlatStyle = FlatStyle.Flat
@@ -67,9 +78,8 @@ namespace MainWindow
 
             UpdateTheFieldsForTheMenu("", new EventArgs());
 
-            StartButton.Click += StartTheGame;
+            StartButton.Click += OpenTheLevelSelectionWindow;
             SizeChanged += UpdateTheFieldsForTheMenu;
-            Paint += DisplayARecord; 
         }
 
         void EraseThePlayingField()
@@ -170,13 +180,88 @@ namespace MainWindow
             PauseButton.BackgroundImage = PauseButton.BackgroundImage == PauseImages[(int)Pause.TurnOn] ? 
             PauseImages[(int)Pause.TurnOff] : PauseImages[(int)Pause.TurnOn];
 
-        public void CloseTheMainMenu()
+        void CloseTheMainMenu()
         {
             Controls.Clear();
             SizeChanged -= UpdateTheFieldsForTheMenu;
-            StartButton.Click -= StartTheGame;
+            StartButton.Click -= OpenTheLevelSelectionWindow;
             BackgroundImage = null;
-            Paint -= DisplayARecord;
+        }
+
+        void OpenTheLevelSelectionWindow(object sender, EventArgs e)
+        {
+            CloseTheMainMenu();
+
+            for (var row = 0; row < RoundButtons.GetLength(0); row++)
+                for (var column = 0; column < RoundButtons.GetLength(1); column++)
+                    ConfigureTheLevelLaunchButton(row, column);
+
+            SizeChanged += RecalculateTheValuesOfTheLevelButtons;
+            RecalculateTheValuesOfTheLevelButtons("", new EventArgs());
+        }
+
+        void ConfigureTheLevelLaunchButton(int row, int column)
+        {
+            RoundButtons[row, column] = new Button()
+            {
+                TextAlign = ContentAlignment.BottomCenter,
+                BackgroundImageLayout = ImageLayout.Zoom,
+                FlatStyle = FlatStyle.Flat,
+            };
+
+            if ((row * 10) + column + 1 <= MaximumAvailableLevel)
+            {
+                RoundButtons[row, column].Text = ((row * 10) + column + 1).ToString();
+                RoundButtons[row, column].BackgroundImage = Image.FromFile(@"..\..\Images\4.png");
+                RoundButtons[row, column].Font = new Font(new FontFamily("Courier New"), Math.Max(ImageSize, 1), FontStyle.Bold);
+                RoundButtons[row, column].Click += LevelTriggerFunctions[row, column];
+            }
+            else RoundButtons[row, column].BackgroundImage = Image.FromFile(@"..\..\Images\5.png");
+
+            RoundButtons[row, column].FlatAppearance.MouseDownBackColor = Color.Black;
+            Controls.Add(RoundButtons[row, column]);
+        }
+
+        void RecalculateTheValuesOfTheLevelButtons(object sender, EventArgs e)
+        {
+            var size = new Size((int)(ImageSize * 2.5), (int)(ImageSize * 2.5));
+            var start = new PointF((float)(ClientSize.Width - 29.5 * ImageSize) / 2f,
+                (float)(ClientSize.Height - 14.5 * ImageSize) / 2f);
+
+            for (var row = 0; row < RoundButtons.GetLength(0); row++)
+                for (var column = 0; column < RoundButtons.GetLength(1); column++)
+                {
+                    RoundButtons[row, column].Location = new System.Drawing.Point((int)(start.X + 2.5 * ImageSize * column + column * ImageSize / 2),
+                        (int)(start.Y + 2.5 * ImageSize * row + row * ImageSize / 2));
+                    RoundButtons[row, column].Size = size;
+                }
+        }
+
+        void FillInTheMatrixWithFunctions()
+        {
+            for (var row = 0; row < LevelTriggerFunctions.GetLength(0); row++)
+                for (var column = 0; column < LevelTriggerFunctions.GetLength(1); column++)
+                {
+                    (var i, var j) = (row, column);
+
+                    LevelTriggerFunctions[i, j] = (object sender, EventArgs e) =>
+                    {
+                        CloseTheLevelSelectionWindow();
+                        OpenTheGame(i * 10 + j + 1);
+                        Controller.ActivateTimers();
+                    };
+                }
+        }
+
+        void CloseTheLevelSelectionWindow()
+        {
+            Controls.Clear();
+
+            for (var i = 0; i < RoundButtons.GetLength(0); i++)
+                for (var j = 0; j < RoundButtons.GetLength(1); j++)
+                    RoundButtons[i, j].Click -= LevelTriggerFunctions[i, j];
+
+            SizeChanged -= RecalculateTheValuesOfTheLevelButtons;
         }
 
         void UpdateTheFieldsForTheMenu(object sender, EventArgs e)
@@ -271,7 +356,7 @@ namespace MainWindow
                     new RectangleF(new PointF(InitialCoordinateOfTheMap.X + 8 * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 6f),
                     new SizeF(16 * ImageSize, ImageSize * 1.5f)), Brushes.Red, new StringFormat() { Alignment = StringAlignment.Center }, ImageSize / 1.2f);
 
-            DrawTheText(e, String.Format("{0, -7} {1, 8}", "Счёт:",  Model.Round),
+            DrawTheText(e, String.Format("{0, -7} {1, 8}", "Счёт:",  Model.Round - 1),
                 new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 10.3f, InitialCoordinateOfTheMap.Y + 7.5f * ImageSize),
                 new SizeF(12 * ImageSize, ImageSize)), Brushes.White, new StringFormat() { Alignment = StringAlignment.Near }, ImageSize / 1.34f);
 
@@ -353,16 +438,6 @@ namespace MainWindow
                         var coordinatesOnTheForm = RecalculateTheCoordinatesOnTheForm(new System.Drawing.Point(x, y));
                         e.Graphics.DrawImage(image, RotateAnArrayOfPoints(coordinatesOnTheForm, creture.AngleInDegrees * Math.PI / 180));
                     }
-        }
-
-        void DisplayARecord(object sender, PaintEventArgs e)
-        {
-            DrawTheText(e, $"Рекорд: {Model.Record}", new RectangleF(
-                new PointF(InitialCoordinateOfTheMap.X + ImageSize * 10f, InitialCoordinateOfTheMap.Y + 3.5f * ImageSize),
-                new SizeF(10 * ImageSize, ImageSize * 1.34f)), Brushes.DarkRed, new StringFormat()
-                { Alignment = StringAlignment.Far }, ImageSize / 1.34f);
-
-            DrawAnAsterisk(new PointF(InitialCoordinateOfTheMap.X + 20f * ImageSize, InitialCoordinateOfTheMap.Y + 3.4f * ImageSize), new SizeF(ImageSize, ImageSize), e.Graphics);
         }
 
         void DrawAnAsterisk(PointF location, SizeF size, Graphics graphics)
