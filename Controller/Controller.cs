@@ -8,7 +8,8 @@ namespace WindowsForm.Controller
     public class Controller
     {
         private readonly GameModel Model;
-        public Timer MainTimer;
+        private Timer MainTimer;
+        private Timer GameTimeTimer;
         private Timer BotManagementTimer;
         private Timer BotCreationTimer;
         public Controller(GameModel model) 
@@ -18,6 +19,11 @@ namespace WindowsForm.Controller
 
         public void ActivateTimers()
         {
+            GameTimeTimer = new Timer();
+            GameTimeTimer.Interval = 1000;
+            GameTimeTimer.Tick += (object sender, EventArgs args) => Model.AmountOfTimeUntilTheEndOfTheRound--;
+            GameTimeTimer.Start();
+
             MainTimer = new Timer();
             MainTimer.Tick += UpdateTheModel;
             MainTimer.Start();
@@ -36,10 +42,12 @@ namespace WindowsForm.Controller
 
         public void StopTimers()
         {
+            GameTimeTimer.Stop();
             MainTimer.Stop();
             BotCreationTimer.Stop();
             BotManagementTimer.Stop();
             
+            GameTimeTimer.Dispose();
             MainTimer.Dispose();
             BotCreationTimer.Dispose();
             BotManagementTimer.Dispose();
@@ -50,6 +58,7 @@ namespace WindowsForm.Controller
             BotCreationTimer.Enabled = !BotCreationTimer.Enabled;
             BotManagementTimer.Enabled = !BotManagementTimer.Enabled;
             MainTimer.Enabled = !MainTimer.Enabled;
+            GameTimeTimer.Enabled = !GameTimeTimer.Enabled;
             MyForm.ChangeThePausePicture();
         }
 

@@ -42,7 +42,7 @@ namespace MainWindow
         public void StartTheGame(object sender, EventArgs e)
         {
             CloseTheMainMenu();
-            OpenTheGame();
+            OpenTheGame(1);
             Controller.ActivateTimers();
         }
 
@@ -85,12 +85,12 @@ namespace MainWindow
             Controller.StopTimers();
         }
 
-        public void OpenTheGame()
+        public void OpenTheGame(int round)
         {
-            Model = new GameModel(new Playground());
+            Model = new GameModel(new Playground(), round);
             Controller = new Controller(Model);
             Model.StateChanged += Invalidate;
-            Model.TheGameIsOver += OpenTheResultsWindow;
+            Model.TheGameIsOver += StartTheNextRound;
 
             CreateGamePanelButtons();
 
@@ -103,11 +103,24 @@ namespace MainWindow
             ActivateTheGameControls();
         }
 
+        public void StartTheNextRound()
+        {
+            if (!Model.Map[Model.Player.Location].Contains(Model.Player) || Model.Round == 100)
+                OpenTheResultsWindow();
+            else
+            {
+                EraseThePlayingField();
+                DeactivateGameControls();
+                OpenTheGame(Model.Round + 1);
+                Controller.ActivateTimers();
+            }
+        }
+
         void RestartTheGame(object sender, EventArgs e)
         {
             EraseThePlayingField();
             DeactivateGameControls();
-            OpenTheGame();
+            OpenTheGame(1);
             Controller.ActivateTimers();
         }
 
@@ -115,7 +128,7 @@ namespace MainWindow
         {
             EraseThePlayingField();
             CloseTheResultsWindow();
-            OpenTheGame();
+            OpenTheGame(1);
             Controller.ActivateTimers();
         }
 
@@ -258,7 +271,7 @@ namespace MainWindow
                     new RectangleF(new PointF(InitialCoordinateOfTheMap.X + 8 * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 6f),
                     new SizeF(16 * ImageSize, ImageSize * 1.5f)), Brushes.Red, new StringFormat() { Alignment = StringAlignment.Center }, ImageSize / 1.2f);
 
-            DrawTheText(e, String.Format("{0, -7} {1, 8}", "Счёт:",  Model.NumberOfPoints),
+            DrawTheText(e, String.Format("{0, -7} {1, 8}", "Счёт:",  Model.Round),
                 new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 10.3f, InitialCoordinateOfTheMap.Y + 7.5f * ImageSize),
                 new SizeF(12 * ImageSize, ImageSize)), Brushes.White, new StringFormat() { Alignment = StringAlignment.Near }, ImageSize / 1.34f);
 
@@ -289,19 +302,21 @@ namespace MainWindow
 
         void DrawAGamePanel(object sender, PaintEventArgs e)
         {
-            DrawTheText(e, $"Рекорд: {Model.Record}",
-                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + 22f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f),
+            var strings = new string[] { "", "0", "00" };
+
+            DrawTheText(e, $"Рекорд:" + strings[3 - Model.Record.ToString().Length] + $"{Model.Record}",
+                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + 21.5f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f),
                 new SizeF(6 * ImageSize, ImageSize)), Brushes.White, new StringFormat() { Alignment = StringAlignment.Far}, ImageSize / 2);
 
-            DrawAnAsterisk(new PointF(InitialCoordinateOfTheMap.X + 28.2f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize * 0.7f),
+            DrawAnAsterisk(new PointF(InitialCoordinateOfTheMap.X + 27.7f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize * 0.7f),
                 new SizeF(ImageSize * 0.7f, ImageSize * 0.7f), e.Graphics);
 
-            DrawTheText(e, $"Счёт: {Model.NumberOfPoints}",
-                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 10f, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f),
-                new SizeF(6 * ImageSize, ImageSize)), Brushes.White, new StringFormat()
+            DrawTheText(e, $"Раунд:" + strings[3 - Model.Round.ToString().Length] + $"{Model.Round}",
+                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 13f, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f),
+                new SizeF(5f * ImageSize, ImageSize)), Brushes.White, new StringFormat()
                 { Alignment = StringAlignment.Far}, ImageSize / 2);
 
-            DrawAnAsterisk(new PointF(InitialCoordinateOfTheMap.X + 16.2f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize * 0.7f),
+            DrawAnAsterisk(new PointF(InitialCoordinateOfTheMap.X + 18.2f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize * 0.7f),
                 new SizeF(0.7f * ImageSize, 0.7f * ImageSize), e.Graphics);
 
             for (var i = 0; i < Model.Player.Health; i++)
@@ -313,6 +328,11 @@ namespace MainWindow
                     new PointF(InitialCoordinateOfTheMap.X + i * ImageSize, InitialCoordinateOfTheMap.Y)
                 });
             }
+
+            DrawTheText(e,
+                $"{Model.AmountOfTimeUntilTheEndOfTheRound / 60}:" + strings[2 - (Model.AmountOfTimeUntilTheEndOfTheRound % 60).ToString().Length] + $"{Model.AmountOfTimeUntilTheEndOfTheRound % 60}",
+                new RectangleF(new PointF(InitialCoordinateOfTheMap.X + 8f * ImageSize, InitialCoordinateOfTheMap.Y - ImageSize / 2 * 1.34f),
+                new SizeF(2f * ImageSize, ImageSize)), Brushes.White, new StringFormat(), ImageSize / 2);
         }
 
         void DrawTheText(PaintEventArgs e, string text, RectangleF location, Brush brushes, StringFormat format, float fontSize)

@@ -13,13 +13,14 @@ namespace WindowsForm.Model
         public List<Bot> ArmyOfBots { get; private set; }
         public Playground Map { get; private set; }
         public Player Player { get; private set; }
-        private int numberOfBots;
-        public int NumberOfPoints { get; private set; }
+        public readonly int Round;
         public int Record { get; private set; }
+        public int AmountOfTimeUntilTheEndOfTheRound;
 
-        public GameModel(Playground map)
+        public GameModel(Playground map, int round)
         {
             Map = map;
+            Round = round;
             var playerLocation = FindAPositionToCreateAnOject();
             Map[playerLocation].Add(new Player(new Random().Next(1, 5) * 90, playerLocation));
             Player = (Player)Map[playerLocation].Last();
@@ -33,6 +34,7 @@ namespace WindowsForm.Model
             Record = date == null ? 0 : int.Parse(date);
 
             StateChanged += () => File.WriteAllText(@"..\..\Model\Record.txt", Record.ToString());
+            AmountOfTimeUntilTheEndOfTheRound = 60;
         }
 
         private void MineTheMap(int quantity)
@@ -77,14 +79,14 @@ namespace WindowsForm.Model
                         creature.CommandAreExecuted(x, y);
                 }
 
-            if (Record < NumberOfPoints)
+            if (Record < Round)
             {
                 RecordHasBeenUpdated = true;
-                Record = NumberOfPoints;
+                Record = Round;
             }
 
             StateChanged();
-            if (!Map[Player.Location].Contains(Player)) TheGameIsOver();
+            if (AmountOfTimeUntilTheEndOfTheRound < 1 || !Map[Player.Location].Contains(Player)) TheGameIsOver();
         }
 
         private List<GameObjects> SelectWinnerCandidatePerLocation(List<GameObjects>[,] creatures, int x, int y)
@@ -120,7 +122,6 @@ namespace WindowsForm.Model
                 var location = FindAPositionToCreateAnOject();
                 Map[location].Add(new Bot(location, random.Next(1, 5) * 90));
                 ArmyOfBots.Add((Bot)Map[location].Last());
-                numberOfBots++;
             }
         }
 
@@ -136,8 +137,6 @@ namespace WindowsForm.Model
             ArmyOfBots = ArmyOfBots
                 .Where(bot => Map[bot.Location].Contains(bot))
                 .ToList();
-
-            NumberOfPoints = numberOfBots - ArmyOfBots.Count;
 
             foreach (var bot in ArmyOfBots)
                 bot.MakeAMove(model);
