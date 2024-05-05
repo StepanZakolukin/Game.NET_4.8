@@ -15,7 +15,9 @@ namespace WindowsForm.Model
         public Player Player { get; private set; }
         public readonly int Round;
         public int Record { get; private set; }
-        public int AmountOfTimeUntilTheEndOfTheRound;
+        public int AmountOfTimeUntilTheEndOfTheRound { get; set; }
+        private int numberOfBotsInTheGame;
+        public int NumberOfBotsDestroyed { get; private set; }
 
         public GameModel(Playground map, int round)
         {
@@ -122,6 +124,7 @@ namespace WindowsForm.Model
                 var location = FindAPositionToCreateAnOject();
                 Map[location].Add(new Bot(location, random.Next(1, 5) * 90));
                 ArmyOfBots.Add((Bot)Map[location].Last());
+                numberOfBotsInTheGame++;
             }
         }
 
@@ -137,6 +140,8 @@ namespace WindowsForm.Model
             ArmyOfBots = ArmyOfBots
                 .Where(bot => Map[bot.Location].Contains(bot))
                 .ToList();
+
+            NumberOfBotsDestroyed = numberOfBotsInTheGame - ArmyOfBots.Count;
 
             foreach (var bot in ArmyOfBots)
                 bot.MakeAMove(model);

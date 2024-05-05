@@ -42,13 +42,13 @@ namespace WindowsForm.Controller
 
         public void StopTimers()
         {
-            GameTimeTimer.Stop();
             MainTimer.Stop();
+            GameTimeTimer.Stop();
             BotCreationTimer.Stop();
             BotManagementTimer.Stop();
             
-            GameTimeTimer.Dispose();
             MainTimer.Dispose();
+            GameTimeTimer.Dispose();
             BotCreationTimer.Dispose();
             BotManagementTimer.Dispose();
         }
