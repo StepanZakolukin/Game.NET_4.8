@@ -31,11 +31,6 @@ namespace WindowsForm.Model
             Map[firstAidKit.Location].Add(firstAidKit);
 
             MineTheMap(15);
-
-            var date = File.ReadAllLines(@"..\..\Model\Record.txt").FirstOrDefault();
-            Record = date == null ? 0 : int.Parse(date);
-
-            StateChanged += () => File.WriteAllText(@"..\..\Model\Record.txt", Record.ToString());
             AmountOfTimeUntilTheEndOfTheRound = 60;
         }
 

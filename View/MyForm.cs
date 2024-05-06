@@ -6,6 +6,7 @@ using WindowsForm.Controller;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using WindowsForm.View;
 
 namespace MainWindow
 {
@@ -17,8 +18,7 @@ namespace MainWindow
         private float sizeOfTheGridCell;
         private PointF initialCoordinate;
 
-        private int level;
-        private int maximumAvailableLevel;
+        private LevelData[][] levelResults;
 
         private Button pauseButton;
         private Button playButton;
@@ -35,6 +35,7 @@ namespace MainWindow
         {
             this.model = model;
             LevelButtons = new Button[3, 6];
+            levelResults = ReadTheSavedData();
             LevelTriggerFunctions = new EventHandler[LevelButtons.GetLength(0), LevelButtons.GetLength(1)];
             FillInTheMatrixWithFunctions();
 
@@ -47,6 +48,7 @@ namespace MainWindow
             //настройка WinForm
             KeyPreview = true;
             DoubleBuffered = true;
+            
             BackColor = Color.Black;
             WindowState = FormWindowState.Maximized;
             Text = "Защитник Брестской крепости";
@@ -102,7 +104,7 @@ namespace MainWindow
         #endregion
 
         #region ИГРА
-        public void OpenTheGame()
+        public void OpenTheGame(int level)
         {
             CreateGamePanelButtons();
             RecalculateTheValuesOfTheGameButtons("", new EventArgs());
@@ -137,8 +139,6 @@ namespace MainWindow
 
         void ActivateGameManagement()
         {
-            level = model.Level;
-
             Click += controller.ToShoot;
             pauseButton.Click += controller.PutItOnPause;
             restartGameButton.Click += RestartTheGame;
@@ -199,14 +199,15 @@ namespace MainWindow
 
         public void StartTheNextLevel()
         {
+            RecordTheResults();
+
             if (!model.Map[model.Player.Location].Contains(model.Player) || model.Level == 50)
                 OpenTheResultsWindow();
             else
             {
                 EraseThePlayingField();
                 DeactivateGameManagement();
-                level++;
-                OpenTheGame();
+                OpenTheGame(model.Level + 1);
             }
         }
 
@@ -214,7 +215,7 @@ namespace MainWindow
         {
             EraseThePlayingField();
             DeactivateGameManagement();
-            OpenTheGame();
+            OpenTheGame(model.Level);
         }
 
         void DrawingTheModel(object sender, PaintEventArgs e)
@@ -241,7 +242,7 @@ namespace MainWindow
                 new System.Drawing.Point((int)(initialCoordinate.X + 9f * sizeOfTheGridCell), (int)(initialCoordinate.Y + sizeOfTheGridCell * 5.3f)),
                 new Size((int)(14 * sizeOfTheGridCell), (int)(sizeOfTheGridCell * 3.5f))));
 
-            DrawTheText(e, $"Уровень {level}", new RectangleF(
+            DrawTheText(e, $"Уровень {model.Level}", new RectangleF(
                 new PointF(initialCoordinate.X + 9f * sizeOfTheGridCell, initialCoordinate.Y + sizeOfTheGridCell * 6f),
                 new SizeF(14 * sizeOfTheGridCell, sizeOfTheGridCell * 2.5f)), Brushes.DarkRed,
                 new StringFormat() { Alignment = StringAlignment.Center }, 1.5f * sizeOfTheGridCell);
@@ -251,8 +252,8 @@ namespace MainWindow
         {
             var strings = new string[] { "", "0" };
 
-            DrawTheText(e, $"Счёт: {model.NumberOfBotsDestroyed}", new RectangleF(new PointF(initialCoordinate.X + 14.9f * sizeOfTheGridCell,
-                initialCoordinate.Y - sizeOfTheGridCell / 2 * 1.34f), new SizeF(3.5f * sizeOfTheGridCell, sizeOfTheGridCell)),
+            DrawTheText(e, $"Счёт: {model.NumberOfBotsDestroyed}", new RectangleF(new PointF(initialCoordinate.X + 14.4f * sizeOfTheGridCell,
+                initialCoordinate.Y - sizeOfTheGridCell / 2 * 1.34f), new SizeF(4f * sizeOfTheGridCell, sizeOfTheGridCell)),
                 Brushes.White, new StringFormat() { Alignment = StringAlignment.Far }, sizeOfTheGridCell / 2);
 
             DrawAPicture(@"..\..\Images\star.png", new PointF(initialCoordinate.X + 18.4f * sizeOfTheGridCell,
@@ -295,9 +296,6 @@ namespace MainWindow
         {
             CloseTheMainMenu();
 
-            var dataFromTheFile = File.ReadAllLines(@"..\..\Model\Record.txt").FirstOrDefault();
-            maximumAvailableLevel = Math.Max(dataFromTheFile == null ? 0 : int.Parse(dataFromTheFile), 1);
-
             for (var row = 0; row < LevelButtons.GetLength(0); row++)
                 for (var column = 0; column < LevelButtons.GetLength(1); column++)
                     ConfigureTheLevelLaunchButton(row, column);
@@ -315,9 +313,10 @@ namespace MainWindow
                 FlatStyle = FlatStyle.Flat,
             };
 
-            if ((row * 10) + column + 1 <= maximumAvailableLevel)
+            if (levelResults[row][column].Available)
             {
-                LevelButtons[row, column].Text = string.Format("{0}\n\n{1, 5}",(row * 10) + column + 1, "0/14");
+                LevelButtons[row, column].Text = string.Format("{0}\n\n{1, 5}", levelResults[row][column].Level,
+                    $"{levelResults[row][column].Record}/{levelResults[row][column].PossibleNumberOfPoints}");
                 LevelButtons[row, column].BackgroundImage = Image.FromFile(@"..\..\Images\LevelIsOpen.png");
                 LevelButtons[row, column].Click += LevelTriggerFunctions[row, column];
             }
@@ -336,9 +335,8 @@ namespace MainWindow
 
                     LevelTriggerFunctions[i, j] = (object sender, EventArgs e) =>
                     {
-                        level = i * 10 + j + 1;
                         CloseTheLevelSelectionWindow();
-                        OpenTheGame();
+                        OpenTheGame(levelResults[i][j].Level);
                     };
                 }
         }
@@ -378,8 +376,6 @@ namespace MainWindow
         #region ОКНО РЕЗУЛЬТАТОВ
         void OpenTheResultsWindow()
         {
-            level = model.Level;
-
             controller.StopTimers();
             pauseButton.Enabled = false;
             restartGameButton.Enabled = false;
@@ -443,7 +439,7 @@ namespace MainWindow
         {
             EraseThePlayingField();
             CloseTheResultsWindow();
-            OpenTheGame();
+            OpenTheGame(model.Level);
         }
 
         void DrawTheResultsWindow(object sender, PaintEventArgs e)
@@ -494,6 +490,31 @@ namespace MainWindow
         #endregion
 
         #region ПРОЧЕЕ
+
+        LevelData[][] ReadTheSavedData()
+        {
+            return File.ReadAllText(@"..\..\View\Record.txt").Split('\n')
+                .Take(LevelButtons.GetLength(0))
+                .Select(line => line.Split('\t').Select(str => str.Split(';')))
+                .Select(line => line.Select(array => new LevelData(array)).ToArray())
+                .ToArray();
+        }
+
+        void RecordTheResults()
+        {
+            var numberOfColumn = LevelButtons.GetLength(1);
+
+            if (!levelResults[model.Level / numberOfColumn][model.Level % numberOfColumn - 1].Available ||
+                levelResults[model.Level / numberOfColumn][model.Level % numberOfColumn - 1].Record < model.NumberOfBotsDestroyed)
+            {
+                levelResults[model.Level / numberOfColumn][model.Level % numberOfColumn - 1].Available = true;
+                levelResults[model.Level / numberOfColumn][model.Level % numberOfColumn - 1].Record = model.NumberOfBotsDestroyed;
+
+                File.WriteAllLines(@"..\..\View\Record.txt", levelResults
+                    .Select(line => string.Join("\t", line.Select(info => info.ToString()))));
+            }
+        }
+
         void DrawTheText(PaintEventArgs e, string text, RectangleF location, Brush brushes, StringFormat format, float fontSize)
         {
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;

@@ -61,6 +61,7 @@
     <Compile Include="Model\SinglyLinkedList.cs" />
     <Compile Include="Model\Stone.cs" />
     <Compile Include="Model\Walker.cs" />
+    <Compile Include="View\LevelData.cs" />
     <Compile Include="View\Pause.cs" />
     <Compile Include="View\MyForm.cs">
       <SubType>Form</SubType>
@@ -117,7 +118,7 @@
     <Content Include="Images\Stone.jpg" />
     <Content Include="Images\Wall.jpg" />
     <Content Include="Model\Map.txt" />
-    <Content Include="Model\Record.txt" />
+    <Content Include="View\Record.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
