@@ -31,7 +31,7 @@ namespace MainWindow
             KeyPreview = true;
             DoubleBuffered = true;
 
-            LevelButtons = new Button[4, 8];
+            LevelButtons = new Button[3, 6];
             LevelTriggerFunctions = new EventHandler[LevelButtons.GetLength(0), LevelButtons.GetLength(1)];
             FillInTheMatrixWithFunctions();
 
@@ -214,18 +214,18 @@ namespace MainWindow
         {
             LevelButtons[row, column] = new Button()
             {
-                TextAlign = ContentAlignment.BottomCenter,
+                TextAlign = ContentAlignment.MiddleLeft,
                 BackgroundImageLayout = ImageLayout.Zoom,
                 FlatStyle = FlatStyle.Flat,
             };
 
             if ((row * 10) + column + 1 <= MaximumAvailableLevel)
             {
-                LevelButtons[row, column].Text = $"{(row * 10) + column + 1}\n17/17";
-                LevelButtons[row, column].BackgroundImage = Image.FromFile(@"..\..\Images\4.png");
+                LevelButtons[row, column].Text = string.Format("{0}\n\n{1, 5}",(row * 10) + column + 1, "0/17");
+                LevelButtons[row, column].BackgroundImage = Image.FromFile(@"..\..\Images\LevelIsOpen.png");
                 LevelButtons[row, column].Click += LevelTriggerFunctions[row, column];
             }
-            else LevelButtons[row, column].BackgroundImage = Image.FromFile(@"..\..\Images\5.png");
+            else LevelButtons[row, column].BackgroundImage = Image.FromFile(@"..\..\Images\LevelIsClosed.png");
 
             LevelButtons[row, column].FlatAppearance.MouseDownBackColor = Color.Black;
             Controls.Add(LevelButtons[row, column]);
@@ -345,11 +345,11 @@ namespace MainWindow
             DrawAPicture(@"..\..\Images\haze.png", new PointF(0, 0), ClientSize, e.Graphics);
 
             e.Graphics.DrawRectangle(new Pen(Color.DarkRed, ImageSize / 5), new Rectangle(
-                new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + 9f * ImageSize), (int)(InitialCoordinateOfTheMap.Y + ImageSize * 6.8f)),
-                new Size((int)(14 * ImageSize), (int)(ImageSize * 2.5f))));
+                new System.Drawing.Point((int)(InitialCoordinateOfTheMap.X + 9f * ImageSize), (int)(InitialCoordinateOfTheMap.Y + ImageSize * 5.3f)),
+                new Size((int)(14 * ImageSize), (int)(ImageSize * 3.5f))));
 
             DrawTheText(e, $"Уровень {Level}", new RectangleF(
-                new PointF(InitialCoordinateOfTheMap.X + 9f * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 7f),
+                new PointF(InitialCoordinateOfTheMap.X + 9f * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 6f),
                 new SizeF(14 * ImageSize, ImageSize * 2.5f)), Brushes.DarkRed,
                 new StringFormat() { Alignment = StringAlignment.Center }, 1.5f * ImageSize);
         }
@@ -358,9 +358,9 @@ namespace MainWindow
         {
             DrawTheBackgroundOfTheResultsWindow(e.Graphics);
 
-            DrawTheText(e, "Игра завершена.",
+            DrawTheText(e, "Игра завершена!",
                 new RectangleF(new PointF(InitialCoordinateOfTheMap.X + 8 * ImageSize, InitialCoordinateOfTheMap.Y + ImageSize * 5f),
-                new SizeF(16 * ImageSize, ImageSize * 1.5f)), Brushes.White, new StringFormat() { Alignment = StringAlignment.Center }, ImageSize / 1.2f);
+                new SizeF(16 * ImageSize, ImageSize * 1.5f)), Brushes.DarkRed, new StringFormat() { Alignment = StringAlignment.Center }, ImageSize / 1.2f);
 
             DrawTheText(e, String.Format("{0, -6} {1, 9}", "Счёт",  Model.NumberOfBotsDestroyed),
                 new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 10.3f, InitialCoordinateOfTheMap.Y + ImageSize * 6.5f),
@@ -373,6 +373,8 @@ namespace MainWindow
                 new RectangleF(new PointF(InitialCoordinateOfTheMap.X + ImageSize * 10.3f, InitialCoordinateOfTheMap.Y + 7.7f * ImageSize),
                 new SizeF(12 * ImageSize, ImageSize)), Brushes.White, new StringFormat(), ImageSize / 1.34f);
 
+            DrawAPicture(@"..\..\Images\Coin.png", new PointF(InitialCoordinateOfTheMap.X + ImageSize * 20.8f, InitialCoordinateOfTheMap.Y + 7.83f * ImageSize),
+                new SizeF(ImageSize * 0.7f, ImageSize * 0.7f), e.Graphics);
         }
 
         void DrawTheBackgroundOfTheResultsWindow(Graphics graphics)
@@ -453,7 +455,7 @@ namespace MainWindow
         void RecalculateTheValuesOfTheLevelButtons(object sender, EventArgs e)
         {
             (var numberOfRows, var numberOfColumns) = (LevelButtons.GetLength(0), LevelButtons.GetLength(1));
-            var buttonSize = new Size((int)(ImageSize * 3.8), (int)(ImageSize * 3.8));
+            var buttonSize = new Size((int)(ImageSize * 4), (int)(ImageSize * 4));
             var distanceBetweenTheButtons = (int)(ImageSize / 2);
             var startingPoint = new PointF(
                 (ClientSize.Width - buttonSize.Width * numberOfColumns - ((numberOfColumns - 1) * distanceBetweenTheButtons)) / 2f,
