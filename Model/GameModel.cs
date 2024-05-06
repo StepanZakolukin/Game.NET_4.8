@@ -13,7 +13,7 @@ namespace WindowsForm.Model
         public List<Bot> ArmyOfBots { get; private set; }
         public Playground Map { get; private set; }
         public Player Player { get; private set; }
-        public readonly int Round;
+        public readonly int Level;
         public int Record { get; private set; }
         public int AmountOfTimeUntilTheEndOfTheRound { get; set; }
         private int numberOfBotsInTheGame;
@@ -22,7 +22,7 @@ namespace WindowsForm.Model
         public GameModel(Playground map, int round)
         {
             Map = map;
-            Round = round;
+            Level = round;
             var playerLocation = FindAPositionToCreateAnOject();
             Map[playerLocation].Add(new Player(new Random().Next(1, 5) * 90, playerLocation));
             Player = (Player)Map[playerLocation].Last();
@@ -81,10 +81,10 @@ namespace WindowsForm.Model
                         creature.CommandAreExecuted(x, y);
                 }
 
-            if (Record < Round)
+            if (Record < Level)
             {
                 RecordHasBeenUpdated = true;
-                Record = Round;
+                Record = Level;
             }
 
             StateChanged();

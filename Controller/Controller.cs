@@ -7,6 +7,7 @@ namespace WindowsForm.Controller
 {
     public class Controller
     {
+        public event Action<bool> PauseIsPressed;
         private readonly GameModel Model;
         private Timer MainTimer;
         private Timer GameTimeTimer;
@@ -59,7 +60,7 @@ namespace WindowsForm.Controller
             BotManagementTimer.Enabled = !BotManagementTimer.Enabled;
             MainTimer.Enabled = !MainTimer.Enabled;
             GameTimeTimer.Enabled = !GameTimeTimer.Enabled;
-            MyForm.ChangeThePausePicture();
+            PauseIsPressed(GameTimeTimer.Enabled);
         }
 
         public void MakeAMove(object sender, KeyEventArgs e)
