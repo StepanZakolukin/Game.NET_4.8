@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using WindowsForm.View;
 
 namespace WindowsForm.Model
 {
@@ -9,29 +9,28 @@ namespace WindowsForm.Model
     {
         public event Action StateChanged;
         public event Action TheGameIsOver;
-        public bool RecordHasBeenUpdated { get; private set; }
         public List<Bot> ArmyOfBots { get; private set; }
         public Playground Map { get; private set; }
         public Player Player { get; private set; }
-        public readonly int Level;
-        public int Record { get; private set; }
         public int AmountOfTimeUntilTheEndOfTheRound { get; set; }
         private int numberOfBotsInTheGame;
         public int NumberOfBotsDestroyed { get; private set; }
+        public readonly InfoAboutTheLevel InfoAboutTheLevel;
 
-        public GameModel(Playground map, int round)
+        public GameModel(Playground map, InfoAboutTheLevel info)
         {
+            InfoAboutTheLevel = info;
             Map = map;
-            Level = round;
             var playerLocation = FindAPositionToCreateAnOject();
             Map[playerLocation].Add(new Player(new Random().Next(1, 5) * 90, playerLocation));
             Player = (Player)Map[playerLocation].Last();
             ArmyOfBots = new List<Bot>();
+            CreateBots();
             var firstAidKit = new FirstAid(FindAPositionToCreateAnOject());
             Map[firstAidKit.Location].Add(firstAidKit);
 
-            MineTheMap(15);
-            AmountOfTimeUntilTheEndOfTheRound = 60;
+            MineTheMap(info.NumberOfMines);
+            AmountOfTimeUntilTheEndOfTheRound = info.DurationInSeconds;
         }
 
         private void MineTheMap(int quantity)
@@ -76,12 +75,6 @@ namespace WindowsForm.Model
                         creature.CommandAreExecuted(x, y);
                 }
 
-            if (Record < Level)
-            {
-                RecordHasBeenUpdated = true;
-                Record = Level;
-            }
-
             StateChanged();
             if (AmountOfTimeUntilTheEndOfTheRound < 1 || !Map[Player.Location].Contains(Player)) TheGameIsOver();
         }
@@ -110,11 +103,13 @@ namespace WindowsForm.Model
             return sortedСreatures.OrderBy(creature => creature.RenderingPriority).ToList();
         }
 
-        public void CreateBots(int quantity)
+        public void CreateBots()
         {
+            if (InfoAboutTheLevel.PossibleNumberOfPoints == numberOfBotsInTheGame) return;
+
             var random = new Random();
 
-            for (var i = 0; i < quantity; i++)
+            for (var i = 0; i < InfoAboutTheLevel.NumberOfBotsAtATime; i++)
             {
                 var location = FindAPositionToCreateAnOject();
                 Map[location].Add(new Bot(location, random.Next(1, 5) * 90));

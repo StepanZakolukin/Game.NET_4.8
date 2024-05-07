@@ -61,7 +61,7 @@
     <Compile Include="Model\SinglyLinkedList.cs" />
     <Compile Include="Model\Stone.cs" />
     <Compile Include="Model\Walker.cs" />
-    <Compile Include="View\LevelData.cs" />
+    <Compile Include="View\InfoAboutTheLevel.cs" />
     <Compile Include="View\Pause.cs" />
     <Compile Include="View\MyForm.cs">
       <SubType>Form</SubType>

@@ -12,14 +12,14 @@ namespace WindowsForm.Model
         public readonly int Height;
         public readonly int Width;
 
-        public Playground() 
+        public Playground(int levelNumber)
         {
             Height = 17;
             Width = 32;
 
             Maps = new Func<string[,]>[] { () => GeneratingMazes.GenerateAMaze(Width, Height), GetAMapFromAFile };
 
-            CreateMap(Maps[new Random().Next(0, 2)]());
+            CreateMap(Maps[levelNumber % 2]());
         }
 
         string[,] GetAMapFromAFile()

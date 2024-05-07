@@ -17,7 +17,7 @@ namespace WindowsForm.Controller
             Model = model;
         }
 
-        public void ActivateTimers()
+        public void ActivateTimers(int intervalForTheAppearanceOfBots)
         {
             GameTimeTimer = new Timer();
             GameTimeTimer.Interval = 1000;
@@ -29,9 +29,9 @@ namespace WindowsForm.Controller
             MainTimer.Start();
 
             BotCreationTimer = new Timer();
-            BotCreationTimer.Interval = 8000;
+            BotCreationTimer.Interval = intervalForTheAppearanceOfBots;
             BotCreationTimer.Tick += (object sender, EventArgs args) => Model.CreateAFirstAidKit();
-            BotCreationTimer.Tick += (object sender, EventArgs args) => Model.CreateBots(2);
+            BotCreationTimer.Tick += (object sender, EventArgs args) => Model.CreateBots();
             BotCreationTimer.Start();
 
             BotManagementTimer = new Timer();

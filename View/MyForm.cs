@@ -18,7 +18,7 @@ namespace MainWindow
         private float sizeOfTheGridCell;
         private PointF initialCoordinate;
 
-        private LevelData[][] levelResults;
+        private InfoAboutTheLevel[][] infoAboutTheLevels;
 
         private Button pauseButton;
         private Button playButton;
@@ -35,7 +35,7 @@ namespace MainWindow
         {
             this.model = model;
             LevelButtons = new Button[3, 6];
-            levelResults = ReadTheSavedData();
+            infoAboutTheLevels = ReadTheSavedData();
             LevelTriggerFunctions = new EventHandler[LevelButtons.GetLength(0), LevelButtons.GetLength(1)];
             FillInTheMatrixWithFunctions();
 
@@ -46,7 +46,7 @@ namespace MainWindow
             };
 
             //настройка WinForm
-            KeyPreview = true;
+            KeyPreview = true; 
             DoubleBuffered = true;
             
             BackColor = Color.Black;
@@ -110,20 +110,17 @@ namespace MainWindow
             RecalculateTheValuesOfTheGameButtons("", new EventArgs());
             SizeChanged += RecalculateTheValuesOfTheGameButtons;
 
-            model = new GameModel(new Playground(), level);
+            model = new GameModel(new Playground(level), infoAboutTheLevels[(level - 1) / LevelButtons.GetLength(1)][(level - 1) % LevelButtons.GetLength(1)]);
             model.StateChanged += Invalidate;
             model.TheGameIsOver += StartTheNextLevel;
 
             controller = new Controller(model);
-            controller.ActivateTimers();
             controller.PauseIsPressed += ChangeThePausePicture;
 
             Paint += DrawingTheModel;
             Paint += DrawAGamePanel;
             Paint += DrawTheStartOfTheLevel;
             Invalidate();
-
-            controller.StopTimers();
 
             Click += StartTheGame;
         }
@@ -132,8 +129,7 @@ namespace MainWindow
         {
             Click -= StartTheGame;
             Paint -= DrawTheStartOfTheLevel;
-
-            controller.ActivateTimers();
+            controller.ActivateTimers(model.InfoAboutTheLevel.IntervalForTheAppearanceOfBots);
             ActivateGameManagement();
         }
 
@@ -201,13 +197,13 @@ namespace MainWindow
         {
             RecordTheResults();
 
-            if (!model.Map[model.Player.Location].Contains(model.Player) || model.Level == 50)
+            if (!model.Map[model.Player.Location].Contains(model.Player) || model.InfoAboutTheLevel.Level == 50)
                 OpenTheResultsWindow();
             else
             {
                 EraseThePlayingField();
                 DeactivateGameManagement();
-                OpenTheGame(model.Level + 1);
+                OpenTheGame(model.InfoAboutTheLevel.Level + 1);
             }
         }
 
@@ -215,7 +211,7 @@ namespace MainWindow
         {
             EraseThePlayingField();
             DeactivateGameManagement();
-            OpenTheGame(model.Level);
+            OpenTheGame(model.InfoAboutTheLevel.Level);
         }
 
         void DrawingTheModel(object sender, PaintEventArgs e)
@@ -242,7 +238,7 @@ namespace MainWindow
                 new System.Drawing.Point((int)(initialCoordinate.X + 9f * sizeOfTheGridCell), (int)(initialCoordinate.Y + sizeOfTheGridCell * 5.3f)),
                 new Size((int)(14 * sizeOfTheGridCell), (int)(sizeOfTheGridCell * 3.5f))));
 
-            DrawTheText(e, $"Уровень {model.Level}", new RectangleF(
+            DrawTheText(e, $"Уровень {model.InfoAboutTheLevel.Level}", new RectangleF(
                 new PointF(initialCoordinate.X + 9f * sizeOfTheGridCell, initialCoordinate.Y + sizeOfTheGridCell * 6f),
                 new SizeF(14 * sizeOfTheGridCell, sizeOfTheGridCell * 2.5f)), Brushes.DarkRed,
                 new StringFormat() { Alignment = StringAlignment.Center }, 1.5f * sizeOfTheGridCell);
@@ -259,7 +255,7 @@ namespace MainWindow
             DrawAPicture(@"..\..\Images\star.png", new PointF(initialCoordinate.X + 18.4f * sizeOfTheGridCell,
                 initialCoordinate.Y - sizeOfTheGridCell * 0.7f), new SizeF(sizeOfTheGridCell * 0.7f, sizeOfTheGridCell * 0.7f), e.Graphics);
 
-            DrawTheText(e, $"Уровень: {model.Level}",
+            DrawTheText(e, $"Уровень: {model.InfoAboutTheLevel.Level}",
                 new RectangleF(new PointF(initialCoordinate.X + sizeOfTheGridCell * 23f, initialCoordinate.Y - sizeOfTheGridCell / 2 * 1.34f),
                 new SizeF(5f * sizeOfTheGridCell, sizeOfTheGridCell)), Brushes.White, new StringFormat()
                 { Alignment = StringAlignment.Center }, sizeOfTheGridCell / 2);
@@ -313,10 +309,10 @@ namespace MainWindow
                 FlatStyle = FlatStyle.Flat,
             };
 
-            if (levelResults[row][column].Available)
+            if (infoAboutTheLevels[row][column].Available)
             {
-                LevelButtons[row, column].Text = string.Format("{0}\n\n{1, 5}", levelResults[row][column].Level,
-                    $"{levelResults[row][column].Record}/{levelResults[row][column].PossibleNumberOfPoints}");
+                LevelButtons[row, column].Text = string.Format("{0}\n\n{1, 5}", infoAboutTheLevels[row][column].Level,
+                    $"{infoAboutTheLevels[row][column].Record}/{infoAboutTheLevels[row][column].PossibleNumberOfPoints}");
                 LevelButtons[row, column].BackgroundImage = Image.FromFile(@"..\..\Images\LevelIsOpen.png");
                 LevelButtons[row, column].Click += LevelTriggerFunctions[row, column];
             }
@@ -336,7 +332,7 @@ namespace MainWindow
                     LevelTriggerFunctions[i, j] = (object sender, EventArgs e) =>
                     {
                         CloseTheLevelSelectionWindow();
-                        OpenTheGame(levelResults[i][j].Level);
+                        OpenTheGame(infoAboutTheLevels[i][j].Level);
                     };
                 }
         }
@@ -439,7 +435,7 @@ namespace MainWindow
         {
             EraseThePlayingField();
             CloseTheResultsWindow();
-            OpenTheGame(model.Level);
+            OpenTheGame(model.InfoAboutTheLevel.Level);
         }
 
         void DrawTheResultsWindow(object sender, PaintEventArgs e)
@@ -491,26 +487,24 @@ namespace MainWindow
 
         #region ПРОЧЕЕ
 
-        LevelData[][] ReadTheSavedData()
+        InfoAboutTheLevel[][] ReadTheSavedData()
         {
             return File.ReadAllText(@"..\..\View\Record.txt").Split('\n')
                 .Take(LevelButtons.GetLength(0))
                 .Select(line => line.Split('\t').Select(str => str.Split(';')))
-                .Select(line => line.Select(array => new LevelData(array)).ToArray())
+                .Select(line => line.Select(array => new InfoAboutTheLevel(array)).ToArray())
                 .ToArray();
         }
 
         void RecordTheResults()
         {
-            var numberOfColumn = LevelButtons.GetLength(1);
-
-            if (!levelResults[model.Level / numberOfColumn][model.Level % numberOfColumn - 1].Available ||
-                levelResults[model.Level / numberOfColumn][model.Level % numberOfColumn - 1].Record < model.NumberOfBotsDestroyed)
+            if (!model.InfoAboutTheLevel.Available ||
+                model.InfoAboutTheLevel.Record < model.NumberOfBotsDestroyed)
             {
-                levelResults[model.Level / numberOfColumn][model.Level % numberOfColumn - 1].Available = true;
-                levelResults[model.Level / numberOfColumn][model.Level % numberOfColumn - 1].Record = model.NumberOfBotsDestroyed;
+                model.InfoAboutTheLevel.Available = true;
+                model.InfoAboutTheLevel.Record = model.NumberOfBotsDestroyed;
 
-                File.WriteAllLines(@"..\..\View\Record.txt", levelResults
+                File.WriteAllLines(@"..\..\View\Record.txt", infoAboutTheLevels
                     .Select(line => string.Join("\t", line.Select(info => info.ToString()))));
             }
         }
