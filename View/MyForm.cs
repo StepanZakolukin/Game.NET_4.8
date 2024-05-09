@@ -419,7 +419,7 @@ namespace MainWindow
 
             DisplayTheTextOnTheGamePanel(graphics);
 
-            DrawAPicture(@"..\..\Images\star.png", new PointF(initialCoordinate.X + 18.4f * sizeOfTheGridCell,
+            DrawAPicture(@"..\..\Images\star.png", new PointF(initialCoordinate.X + 18.9f * sizeOfTheGridCell,
                 initialCoordinate.Y - sizeOfTheGridCell * 0.7f), new SizeF(sizeOfTheGridCell * 0.7f, sizeOfTheGridCell * 0.7f), graphics);
 
             for (var i = 0; i < model.Player.Health; i++)
@@ -443,13 +443,13 @@ namespace MainWindow
 
             DrawTheText(graphics, $"Уровень: {model.InfoAboutTheLevel.Level}",
                 new RectangleF(
-                    new PointF(initialCoordinate.X + sizeOfTheGridCell * 23f, initialCoordinate.Y - sizeOfTheGridCell / 2 * 1.34f),
+                    new PointF(initialCoordinate.X + sizeOfTheGridCell * 24f, initialCoordinate.Y - sizeOfTheGridCell / 2 * 1.34f),
                     new SizeF(5f * sizeOfTheGridCell, sizeOfTheGridCell)), Brushes.LightGoldenrodYellow, new StringFormat()
                 { Alignment = StringAlignment.Center }, sizeOfTheGridCell / 2);
 
             DrawTheText(graphics, $"Счёт: {model.NumberOfBotsDestroyed}",
                 new RectangleF(
-                    new PointF(initialCoordinate.X + 14.4f * sizeOfTheGridCell, initialCoordinate.Y - sizeOfTheGridCell / 2 * 1.34f),
+                    new PointF(initialCoordinate.X + 14.9f * sizeOfTheGridCell, initialCoordinate.Y - sizeOfTheGridCell / 2 * 1.34f),
                     new SizeF(4f * sizeOfTheGridCell, sizeOfTheGridCell)),
                 Brushes.LightGoldenrodYellow, new StringFormat() { Alignment = StringAlignment.Far }, sizeOfTheGridCell / 2);
         }
