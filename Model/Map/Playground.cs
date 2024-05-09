@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using WindowsForm.Model.GameEntities;
 
-namespace WindowsForm.Model
+namespace WindowsForm.Model.Map
 {
     public class Playground
     {
@@ -26,7 +27,7 @@ namespace WindowsForm.Model
         {
             var result = new string[Width, Height];
 
-            var map = File.ReadAllText(@"..\..\Model\Map.txt").Split('\n')
+            var map = File.ReadAllText(@"..\..\Model\Map\Map.txt").Split('\n')
                 .Select(st => st.Split('\t'))
                 .ToArray();
 

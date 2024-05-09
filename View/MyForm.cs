@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using WindowsForm.View;
+using Point = System.Drawing.Point;
 
 namespace MainWindow
 {
@@ -18,13 +19,17 @@ namespace MainWindow
         private float sizeOfTheGridCell;
         private PointF initialCoordinate;
 
-        private InfoAboutTheLevel[][] infoAboutTheLevels;
+        private readonly InfoAboutTheLevel[][] infoAboutTheLevels;
 
+        private Button yesButton;
+        private Button noButton;
         private Button pauseButton;
         private Button playButton;
-        private Button buttonToGoToTheMenu;
-        private Button restartGameButton;
+        private Button exitButton;
+        private Button buttonToGoToTheLevelSelection;
         private Button startOverButton;
+        private Button gameInformationButton;
+        private Button backButton;
 
         private readonly Button[,] LevelButtons;
         private readonly EventHandler[,] LevelTriggerFunctions;
@@ -48,7 +53,8 @@ namespace MainWindow
             //настройка WinForm
             KeyPreview = true; 
             DoubleBuffered = true;
-            
+            Size = new Size() { Height = 450, Width = 800 };
+
             BackColor = Color.Black;
             WindowState = FormWindowState.Maximized;
             Text = "Защитник Брестской крепости";
@@ -69,8 +75,8 @@ namespace MainWindow
 
             playButton = new Button()
             {
-                BackgroundImage = Image.FromFile(@"..\..\Images\Play.png"),
-                BackgroundImageLayout = ImageLayout.Zoom,
+                Text = "Играть",
+                ForeColor = Color.DarkRed,
                 BackColor = Color.FromArgb(0, 0, 0, 0),
                 FlatStyle = FlatStyle.Flat
             };
@@ -82,7 +88,7 @@ namespace MainWindow
 
             RecalculateTheDimensionsInTheMainMenu("", new EventArgs());
 
-            playButton.Click += OpenTheLevelSelectionWindow;
+            playButton.Click += LaunchTheLevelSelectionWindow;
             SizeChanged += RecalculateTheDimensionsInTheMainMenu;
         }
 
@@ -94,210 +100,49 @@ namespace MainWindow
             BackgroundImage = null;
         }
 
+        void LaunchTheLevelSelectionWindow(object sender, EventArgs e)
+        {
+            CloseTheMainMenu();
+            OpenTheLevelSelectionWindow(sender, e);
+        }
+
         void RecalculateTheDimensionsInTheMainMenu(object sender, EventArgs e)
         {
-            playButton.Location = new System.Drawing.Point((int)(initialCoordinate.X + sizeOfTheGridCell * 16.3),
+            playButton.Location = new Point((int)(initialCoordinate.X + sizeOfTheGridCell * 16.3),
                 (int)(initialCoordinate.Y + sizeOfTheGridCell * 11));
-            playButton.Size = new Size() { Width = (int)(6 * sizeOfTheGridCell), Height = (int)(2 * sizeOfTheGridCell) };
-            playButton.FlatAppearance.BorderSize = (int)sizeOfTheGridCell / 9;
-        }
-        #endregion
+            playButton.Size = new Size((int)(6 * sizeOfTheGridCell), (int)(2 * sizeOfTheGridCell));
+            playButton.FlatAppearance.BorderSize = (int)sizeOfTheGridCell / 7;
 
-        #region ИГРА
-        public void OpenTheGame(int level)
-        {
-            CreateGamePanelButtons();
-            RecalculateTheValuesOfTheGameButtons("", new EventArgs());
-            SizeChanged += RecalculateTheValuesOfTheGameButtons;
-
-            model = new GameModel(new Playground(level), infoAboutTheLevels[(level - 1) / LevelButtons.GetLength(1)][(level - 1) % LevelButtons.GetLength(1)]);
-            model.StateChanged += Invalidate;
-            model.TheGameIsOver += StartTheNextLevel;
-
-            controller = new Controller(model);
-            controller.PauseIsPressed += ChangeThePausePicture;
-
-            Paint += DrawingTheModel;
-            Paint += DrawAGamePanel;
-            Paint += DrawTheStartOfTheLevel;
-            Invalidate();
-
-            Click += StartTheGame;
-        }
-
-        void StartTheGame(object sender, EventArgs e)
-        {
-            Click -= StartTheGame;
-            Paint -= DrawTheStartOfTheLevel;
-            controller.ActivateTimers(model.InfoAboutTheLevel.IntervalForTheAppearanceOfBots);
-            ActivateGameManagement();
-        }
-
-        void ActivateGameManagement()
-        {
-            Click += controller.ToShoot;
-            pauseButton.Click += controller.PutItOnPause;
-            restartGameButton.Click += RestartTheGame;
-
-            KeyDown += controller.MakeAMove;
-            MouseWheel += controller.RotateThePlayer;
-        }
-
-        void DeactivateGameManagement()
-        {
-            Click -= controller.ToShoot;
-            restartGameButton.Click -= RestartTheGame;
-            pauseButton.Click -= controller.PutItOnPause;
-
-            KeyDown -= controller.MakeAMove;
-            MouseWheel -= controller.RotateThePlayer;
-        }
-
-        void CreateGamePanelButtons()
-        {
-            pauseButton = new Button()
-            {
-                BackColor = Color.FromArgb(0, 0, 0, 0),
-                BackgroundImage = pauseImages[true],
-                BackgroundImageLayout = ImageLayout.Zoom,
-                FlatStyle = FlatStyle.Flat
-            };
-            pauseButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
-            pauseButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 255, 255, 255);
-            Controls.Add(pauseButton);
-
-            restartGameButton = new Button()
-            {
-                BackColor = Color.FromArgb(0, 0, 0, 0),
-                BackgroundImage = Image.FromFile(@"..\..\Images\RestartGameButton.png"),
-                BackgroundImageLayout = ImageLayout.Zoom,
-                FlatStyle = FlatStyle.Flat
-            };
-            restartGameButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
-            restartGameButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 255, 255, 255);
-            Controls.Add(restartGameButton);
-        }
-
-        void EraseThePlayingField()
-        {
-            Controls.Clear();
-
-            Paint -= DrawingTheModel;
-            Paint -= DrawAGamePanel;
-
-            SizeChanged -= RecalculateTheValuesOfTheGameButtons;
-
-            model.StateChanged -= Invalidate;
-            model.TheGameIsOver -= OpenTheResultsWindow;
-
-            controller.StopTimers();
-        }
-
-        public void StartTheNextLevel()
-        {
-            RecordTheResults();
-
-            if (!model.Map[model.Player.Location].Contains(model.Player) || model.InfoAboutTheLevel.Level == 50)
-                OpenTheResultsWindow();
-            else
-            {
-                EraseThePlayingField();
-                DeactivateGameManagement();
-                OpenTheGame(model.InfoAboutTheLevel.Level + 1);
-            }
-        }
-
-        void RestartTheGame(object sender, EventArgs e)
-        {
-            EraseThePlayingField();
-            DeactivateGameManagement();
-            OpenTheGame(model.InfoAboutTheLevel.Level);
-        }
-
-        void DrawingTheModel(object sender, PaintEventArgs e)
-        {
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-
-            for (var x = 0; x < model.Map.Width; x++)
-                for (var y = 0; y < model.Map.Height; y++)
-                    foreach (var creture in model.Map[x, y])
-                    {
-                        var image = creture.Picture;
-                        var coordinatesOnTheForm = RecalculateTheCoordinatesOnTheForm(new System.Drawing.Point(x, y));
-                        e.Graphics.DrawImage(image, RotateAnArrayOfPoints(coordinatesOnTheForm, creture.AngleInDegrees * Math.PI / 180));
-                    }
-        }
-
-        void DrawTheStartOfTheLevel(object sender, PaintEventArgs e)
-        {
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-
-            DrawAPicture(@"..\..\Images\haze.png", new PointF(0, 0), ClientSize, e.Graphics);
-
-            e.Graphics.DrawRectangle(new Pen(Color.DarkRed, sizeOfTheGridCell / 5), new Rectangle(
-                new System.Drawing.Point((int)(initialCoordinate.X + 9f * sizeOfTheGridCell), (int)(initialCoordinate.Y + sizeOfTheGridCell * 5.3f)),
-                new Size((int)(14 * sizeOfTheGridCell), (int)(sizeOfTheGridCell * 3.5f))));
-
-            DrawTheText(e, $"Уровень {model.InfoAboutTheLevel.Level}", new RectangleF(
-                new PointF(initialCoordinate.X + 9f * sizeOfTheGridCell, initialCoordinate.Y + sizeOfTheGridCell * 6f),
-                new SizeF(14 * sizeOfTheGridCell, sizeOfTheGridCell * 2.5f)), Brushes.DarkRed,
-                new StringFormat() { Alignment = StringAlignment.Center }, 1.5f * sizeOfTheGridCell);
-        }
-
-        void DrawAGamePanel(object sender, PaintEventArgs e)
-        {
-            var strings = new string[] { "", "0" };
-
-            DrawTheText(e, $"Счёт: {model.NumberOfBotsDestroyed}", new RectangleF(new PointF(initialCoordinate.X + 14.4f * sizeOfTheGridCell,
-                initialCoordinate.Y - sizeOfTheGridCell / 2 * 1.34f), new SizeF(4f * sizeOfTheGridCell, sizeOfTheGridCell)),
-                Brushes.White, new StringFormat() { Alignment = StringAlignment.Far }, sizeOfTheGridCell / 2);
-
-            DrawAPicture(@"..\..\Images\star.png", new PointF(initialCoordinate.X + 18.4f * sizeOfTheGridCell,
-                initialCoordinate.Y - sizeOfTheGridCell * 0.7f), new SizeF(sizeOfTheGridCell * 0.7f, sizeOfTheGridCell * 0.7f), e.Graphics);
-
-            DrawTheText(e, $"Уровень: {model.InfoAboutTheLevel.Level}",
-                new RectangleF(new PointF(initialCoordinate.X + sizeOfTheGridCell * 23f, initialCoordinate.Y - sizeOfTheGridCell / 2 * 1.34f),
-                new SizeF(5f * sizeOfTheGridCell, sizeOfTheGridCell)), Brushes.White, new StringFormat()
-                { Alignment = StringAlignment.Center }, sizeOfTheGridCell / 2);
-
-            for (var i = 0; i < model.Player.Health; i++)
-                DrawAPicture(@"..\..\Images\heart.png", new PointF(initialCoordinate.X + i * sizeOfTheGridCell,
-                    initialCoordinate.Y - sizeOfTheGridCell * 0.7f), new SizeF(sizeOfTheGridCell * 0.7f, sizeOfTheGridCell * 0.7f), e.Graphics);
-
-            DrawTheText(e,
-                $"0{model.AmountOfTimeUntilTheEndOfTheRound / 60}:" + strings[2 - (model.AmountOfTimeUntilTheEndOfTheRound % 60).ToString().Length] + $"{model.AmountOfTimeUntilTheEndOfTheRound % 60}",
-                new RectangleF(new PointF(initialCoordinate.X + 8.8f * sizeOfTheGridCell, initialCoordinate.Y - sizeOfTheGridCell / 2 * 1.34f),
-                new SizeF(2.5f * sizeOfTheGridCell, sizeOfTheGridCell)), Brushes.White, new StringFormat(), sizeOfTheGridCell / 2);
-
-            DrawAPicture(@"..\..\Images\Timer.png", new PointF(initialCoordinate.X + 8.1f * sizeOfTheGridCell,
-                initialCoordinate.Y - sizeOfTheGridCell * 0.7f), new SizeF(sizeOfTheGridCell * 0.7f, sizeOfTheGridCell * 0.7f), e.Graphics);
-        }
-
-        void ChangeThePausePicture(bool gameIsRunning) => pauseButton.BackgroundImage = pauseImages[gameIsRunning];
-
-        void RecalculateTheValuesOfTheGameButtons(object sender, EventArgs e)
-        {
-            pauseButton.Location = new System.Drawing.Point((int)(initialCoordinate.X + sizeOfTheGridCell * (model.Map.Width - 1)),
-                (int)(initialCoordinate.Y - sizeOfTheGridCell));
-            pauseButton.Size = new Size((int)sizeOfTheGridCell, (int)sizeOfTheGridCell);
-
-            restartGameButton.Location = new System.Drawing.Point((int)(initialCoordinate.X + sizeOfTheGridCell * (model.Map.Width - 2)),
-                (int)(initialCoordinate.Y - sizeOfTheGridCell));
-            restartGameButton.Size = pauseButton.Size;
+            playButton.Font = new Font(new FontFamily("Courier New"), Math.Max(sizeOfTheGridCell, 1), FontStyle.Bold);
         }
         #endregion
 
         #region ТАБЛИЦА УРОВНЕЙ
         void OpenTheLevelSelectionWindow(object sender, EventArgs e)
-        {
-            CloseTheMainMenu();
+        {   
+            gameInformationButton = new Button()
+            {
+                Text = "i",
+                TextAlign = ContentAlignment.BottomCenter,
+                ForeColor = Color.LightGoldenrodYellow,
+                BackgroundImage = Image.FromFile(@"..\..\Images\Frame.png"),
+                BackgroundImageLayout = ImageLayout.Zoom,
+                BackColor = Color.FromArgb(0, 0, 0, 0),
+                FlatStyle = FlatStyle.Flat
+            };
+            gameInformationButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
+            gameInformationButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 255, 255, 255);
+            gameInformationButton.FlatAppearance.BorderColor = Color.Black;
+            Controls.Add(gameInformationButton);
 
             for (var row = 0; row < LevelButtons.GetLength(0); row++)
                 for (var column = 0; column < LevelButtons.GetLength(1); column++)
                     ConfigureTheLevelLaunchButton(row, column);
 
             SizeChanged += RecalculateTheValuesOfTheLevelButtons;
-            RecalculateTheValuesOfTheLevelButtons("", new EventArgs());
+            RecalculateTheValuesOfTheLevelButtons(sender, e);
+
+            gameInformationButton.Click += OpenTheGameInformationWindow;
         }
 
         void ConfigureTheLevelLaunchButton(int row, int column)
@@ -346,6 +191,8 @@ namespace MainWindow
                     LevelButtons[i, j].Click -= LevelTriggerFunctions[i, j];
 
             SizeChanged -= RecalculateTheValuesOfTheLevelButtons;
+
+            gameInformationButton.Click -= OpenTheGameInformationWindow;
         }
 
         void RecalculateTheValuesOfTheLevelButtons(object sender, EventArgs e)
@@ -360,32 +207,392 @@ namespace MainWindow
             for (var row = 0; row < numberOfRows; row++)
                 for (var column = 0; column < numberOfColumns; column++)
                 {
-                    LevelButtons[row, column].Location = new System.Drawing.Point(
+                    LevelButtons[row, column].Location = new Point(
                         (int)(startingPoint.X + buttonSize.Width * column + column * distanceBetweenTheButtons),
                         (int)(startingPoint.Y + buttonSize.Height * row + row * distanceBetweenTheButtons));
                     LevelButtons[row, column].Size = buttonSize;
                     LevelButtons[row, column].Font = new Font(new FontFamily("Courier New"), Math.Max(sizeOfTheGridCell / 1.5f, 1), FontStyle.Bold);
                 }
+
+            gameInformationButton.Font = new Font(new FontFamily("Courier New"), Math.Max(sizeOfTheGridCell / 1.8f, 1), FontStyle.Bold);
+            gameInformationButton.Location = new Point((int)(ClientSize.Width - 1.2 * sizeOfTheGridCell), 0);
+            gameInformationButton.Size = new Size((int)(1.2 * sizeOfTheGridCell), (int)(1.2 * sizeOfTheGridCell));
+        }
+        #endregion
+
+        #region ОКНО ИНФОРМАЦИИ ОБ ИГРЕ
+        void OpenTheGameInformationWindow(object sender, EventArgs e)
+        {
+            CloseTheLevelSelectionWindow();
+
+            BackgroundImage = Image.FromFile(@"..\..\Images\info.png");
+
+            backButton = new Button()
+            {
+                BackgroundImage = Image.FromFile(@"..\..\Images\BackButton.png"),
+                BackgroundImageLayout = ImageLayout.Zoom,
+                BackColor = Color.FromArgb(0, 0, 0, 0),
+                FlatStyle = FlatStyle.Flat
+            };
+            backButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
+            backButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 255, 255, 255);
+            backButton.FlatAppearance.BorderColor = Color.Black;
+            Controls.Add(backButton);
+
+            SizeChanged += RecalculateTheCoordinatesOfTheGameInformationWindow;
+            RecalculateTheCoordinatesOfTheGameInformationWindow(sender, e);
+
+            backButton.Click += ReturnToTheLevelSelectionWindow;
+        }
+
+        void ReturnToTheLevelSelectionWindow(object sender, EventArgs e)
+        {
+            CloseTheGameInformationWindow();
+            OpenTheLevelSelectionWindow(sender, e);
+        }
+
+        void CloseTheGameInformationWindow()
+        {
+            Controls.Clear();
+            BackgroundImage = null;
+            SizeChanged -= RecalculateTheCoordinatesOfTheGameInformationWindow;
+            backButton.Click -= ReturnToTheLevelSelectionWindow;
+        }
+
+        void RecalculateTheCoordinatesOfTheGameInformationWindow(object sender, EventArgs e)
+        {
+            backButton.Location = new Point(0, 0);
+            backButton.Size = new Size((int)(1.2 * sizeOfTheGridCell), (int)(1.2 * sizeOfTheGridCell));
+        }
+        #endregion
+
+        #region ИГРА
+        public void OpenTheGame(int level)
+        {
+            CreateGamePanelButtons();
+            pauseButton.Enabled = false;
+            exitButton.Enabled = false;
+            RecalculateTheValuesOfTheGameButtons("", new EventArgs());
+            SizeChanged += RecalculateTheValuesOfTheGameButtons;
+
+            model = new GameModel(new WindowsForm.Model.Map.Playground(level),
+                infoAboutTheLevels[(level - 1) / LevelButtons.GetLength(1)][(level - 1) % LevelButtons.GetLength(1)]);
+            model.StateChanged += Invalidate;
+            model.TheGameIsOver += StartTheNextLevel;
+
+            controller = new Controller(model);
+            controller.PauseIsPressed += ChangeThePausePicture;
+
+            Paint += DrawingTheModel;
+            Paint += DrawAGamePanel;
+            Paint += DrawTheStartOfTheLevel;
+            Invalidate();
+
+            Click += StartTheGame;
+        }
+
+        void StartTheGame(object sender, EventArgs e)
+        {
+            pauseButton.Enabled = true;
+            exitButton.Enabled = true;
+            Click -= StartTheGame;
+            Paint -= DrawTheStartOfTheLevel;
+            controller.ActivateTimers(model.InfoAboutTheLevel.IntervalForTheAppearanceOfBots);
+            ActivateGameManagement();
+        }
+
+        void ActivateGameManagement()
+        {
+            Click += controller.ToShoot;
+            pauseButton.Click += controller.PutItOnPause;
+            exitButton.Click += OpenAConfirmationWindow;
+
+            KeyDown += controller.MakeAMove;
+            MouseWheel += controller.RotateThePlayer;
+        }
+
+        void DeactivateGameManagement()
+        {
+            Click -= controller.ToShoot;
+            pauseButton.Click -= controller.PutItOnPause;
+            exitButton.Click -= OpenAConfirmationWindow;
+
+            KeyDown -= controller.MakeAMove;
+            MouseWheel -= controller.RotateThePlayer;
+        }
+
+        void CreateGamePanelButtons()
+        {
+            pauseButton = new Button()
+            {
+                BackColor = Color.FromArgb(0, 0, 0, 0),
+                BackgroundImage = pauseImages[true],
+                BackgroundImageLayout = ImageLayout.Zoom,
+                FlatStyle = FlatStyle.Flat
+            };
+            pauseButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
+            pauseButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 255, 255, 255);
+            Controls.Add(pauseButton);
+
+            exitButton = new Button()
+            {
+                BackColor = Color.FromArgb(0, 0, 0, 0),
+                BackgroundImage = Image.FromFile(@"..\..\Images\Exit.png"),
+                BackgroundImageLayout = ImageLayout.Zoom,
+                FlatStyle = FlatStyle.Flat
+            };
+            exitButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
+            exitButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 255, 255, 255);
+            Controls.Add(exitButton);
+        }
+
+        void EraseThePlayingField()
+        {
+            Controls.Clear();
+
+            Paint -= DrawingTheModel;
+            Paint -= DrawAGamePanel;
+
+            SizeChanged -= RecalculateTheValuesOfTheGameButtons;
+
+            model.StateChanged -= Invalidate;
+            model.TheGameIsOver -= StartTheNextLevel;
+
+            controller.StopTimers();
+        }
+
+        public void StartTheNextLevel()
+        {
+            RecordTheResults();
+
+            if (!model.Map[model.Player.Location].Contains(model.Player) || model.InfoAboutTheLevel.Level == 18)
+                OpenTheResultsWindow();
+            else
+            {
+                EraseThePlayingField();
+                DeactivateGameManagement();
+                OpenTheGame(model.InfoAboutTheLevel.Level + 1);
+            }
+        }
+
+        void RestartTheGame(object sender, EventArgs e)
+        {
+            RecordTheResults();
+            EraseThePlayingField();
+            DeactivateGameManagement();
+            OpenTheGame(model.InfoAboutTheLevel.Level);
+        }
+
+        void DrawingTheModel(object sender, PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+
+            for (var x = 0; x < model.Map.Width; x++)
+                for (var y = 0; y < model.Map.Height; y++)
+                    foreach (var creture in model.Map[x, y])
+                    {
+                        var image = creture.Picture;
+                        var coordinatesOnTheForm = RecalculateTheCoordinatesOnTheForm(new Point(x, y));
+                        e.Graphics.DrawImage(image, RotateAnArrayOfPoints(coordinatesOnTheForm, creture.AngleInDegrees * Math.PI / 180));
+                    }
+        }
+
+        void DrawTheStartOfTheLevel(object sender, PaintEventArgs e)
+        {
+            var graphics = e.Graphics;
+            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+
+            DrawAWindow(graphics,
+                new Point((int)(initialCoordinate.X + 9f * sizeOfTheGridCell), (int)(initialCoordinate.Y + sizeOfTheGridCell * 5.3f)),
+                new Size((int)(14 * sizeOfTheGridCell), (int)(sizeOfTheGridCell * 3.5f)));
+
+            DrawTheText(graphics, $"Уровень {model.InfoAboutTheLevel.Level}", new RectangleF(
+                new PointF(initialCoordinate.X + 9f * sizeOfTheGridCell, initialCoordinate.Y + sizeOfTheGridCell * 6f),
+                new SizeF(14 * sizeOfTheGridCell, sizeOfTheGridCell * 2.5f)), Brushes.LightGoldenrodYellow,
+                new StringFormat() { Alignment = StringAlignment.Center }, 1.5f * sizeOfTheGridCell);
+        }
+
+        void DrawAGamePanel(object sender, PaintEventArgs e)
+        {
+            var graphics = e.Graphics;
+            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+
+            DisplayTheTextOnTheGamePanel(graphics);
+
+            DrawAPicture(@"..\..\Images\star.png", new PointF(initialCoordinate.X + 18.4f * sizeOfTheGridCell,
+                initialCoordinate.Y - sizeOfTheGridCell * 0.7f), new SizeF(sizeOfTheGridCell * 0.7f, sizeOfTheGridCell * 0.7f), graphics);
+
+            for (var i = 0; i < model.Player.Health; i++)
+                DrawAPicture(@"..\..\Images\heart.png", new PointF(initialCoordinate.X + i * sizeOfTheGridCell,
+                    initialCoordinate.Y - sizeOfTheGridCell * 0.7f), new SizeF(sizeOfTheGridCell * 0.7f, sizeOfTheGridCell * 0.7f), graphics);
+
+            DrawAPicture(@"..\..\Images\Timer.png", new PointF(initialCoordinate.X + 8.1f * sizeOfTheGridCell,
+                initialCoordinate.Y - sizeOfTheGridCell * 0.7f), new SizeF(sizeOfTheGridCell * 0.7f, sizeOfTheGridCell * 0.7f), graphics);
+        }
+
+        void DisplayTheTextOnTheGamePanel(Graphics graphics)
+        {
+            var strings = new string[] { "", "0" };
+
+            DrawTheText(graphics,
+                $"0{model.AmountOfTimeUntilTheEndOfTheRound / 60}:" + strings[2 - (model.AmountOfTimeUntilTheEndOfTheRound % 60).ToString().Length] + $"{model.AmountOfTimeUntilTheEndOfTheRound % 60}",
+                new RectangleF(
+                    new PointF(initialCoordinate.X + 8.8f * sizeOfTheGridCell, initialCoordinate.Y - sizeOfTheGridCell / 2 * 1.34f),
+                    new SizeF(2.5f * sizeOfTheGridCell, sizeOfTheGridCell)),
+                Brushes.LightGoldenrodYellow, new StringFormat(), sizeOfTheGridCell / 2);
+
+            DrawTheText(graphics, $"Уровень: {model.InfoAboutTheLevel.Level}",
+                new RectangleF(
+                    new PointF(initialCoordinate.X + sizeOfTheGridCell * 23f, initialCoordinate.Y - sizeOfTheGridCell / 2 * 1.34f),
+                    new SizeF(5f * sizeOfTheGridCell, sizeOfTheGridCell)), Brushes.LightGoldenrodYellow, new StringFormat()
+                { Alignment = StringAlignment.Center }, sizeOfTheGridCell / 2);
+
+            DrawTheText(graphics, $"Счёт: {model.NumberOfBotsDestroyed}",
+                new RectangleF(
+                    new PointF(initialCoordinate.X + 14.4f * sizeOfTheGridCell, initialCoordinate.Y - sizeOfTheGridCell / 2 * 1.34f),
+                    new SizeF(4f * sizeOfTheGridCell, sizeOfTheGridCell)),
+                Brushes.LightGoldenrodYellow, new StringFormat() { Alignment = StringAlignment.Far }, sizeOfTheGridCell / 2);
+        }
+
+        void ChangeThePausePicture(bool gameIsRunning) => pauseButton.BackgroundImage = pauseImages[gameIsRunning];
+
+        void RecalculateTheValuesOfTheGameButtons(object sender, EventArgs e)
+        {
+            pauseButton.Location = new Point((int)(initialCoordinate.X + sizeOfTheGridCell * (model.Map.Width - 2)),
+                (int)(initialCoordinate.Y - sizeOfTheGridCell));
+            pauseButton.Size = new Size((int)sizeOfTheGridCell, (int)sizeOfTheGridCell);
+
+            exitButton.Location = new Point((int)(initialCoordinate.X + sizeOfTheGridCell * (model.Map.Width - 1)), (int)(initialCoordinate.Y - sizeOfTheGridCell));
+            exitButton.Size = pauseButton.Size;
+        }
+        #endregion
+
+        #region ОКНО ПОДТВЕРЖДЕНИЯ
+        void OpenAConfirmationWindow(object sender, EventArgs e)
+        {
+            exitButton.Enabled = false;
+            pauseButton.Enabled = false;
+            Paint += DrawAConfirmationWindow;
+
+            if (pauseButton.BackgroundImage == pauseImages[true])
+                controller.PutItOnPause(sender, e);
+
+            InitializeConfirmationWindowButton();
+            noButton.Click += ContinueTheGame;
+            yesButton.Click += SumUpTheGame;
+
+            RecalculateTheCoordinatesOfTheConfirmationWindow(sender, e);
+            SizeChanged += RecalculateTheCoordinatesOfTheConfirmationWindow;
+
+            Invalidate();
+        }
+
+        void CloseAConfirmationWindow()
+        {
+            if (yesButton == null) return;
+
+            Controls.Remove(yesButton);
+            Controls.Remove(noButton);
+            noButton.Click -= ContinueTheGame;
+            yesButton.Click -= SumUpTheGame;
+
+            Paint -= DrawAConfirmationWindow;
+            SizeChanged -= RecalculateTheCoordinatesOfTheConfirmationWindow;
+        }
+
+        void InitializeConfirmationWindowButton()
+        {
+            yesButton = new Button()
+            {
+                Text = "Да",
+                ForeColor = Color.LightGoldenrodYellow,
+                BackColor = Color.FromArgb(0, 0, 0, 0),
+                FlatStyle = FlatStyle.Flat
+            };
+            Controls.Add(yesButton);
+            yesButton.FlatAppearance.BorderColor = Color.LightGoldenrodYellow;
+            yesButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
+
+            noButton = new Button()
+            {
+                Text = "Нет",
+                ForeColor = Color.LightGoldenrodYellow,
+                BackColor = Color.FromArgb(0, 0, 0, 0),
+                FlatStyle = FlatStyle.Flat,
+            };
+            Controls.Add(noButton);
+            noButton.FlatAppearance.BorderColor = Color.LightGoldenrodYellow;
+            noButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
+        }
+
+        void SumUpTheGame(object sender, EventArgs e)
+        {
+            OpenTheResultsWindow();
+            Invalidate();
+        }
+
+        void ContinueTheGame(object sender, EventArgs e)
+        {
+            CloseAConfirmationWindow();
+
+            pauseButton.Enabled = true;
+            exitButton.Enabled = true;
+            controller.PutItOnPause(sender, e);
+        }
+
+        void DrawAConfirmationWindow(object sender, PaintEventArgs e)
+        {
+            var graphics = e.Graphics;
+            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+
+            DrawAWindow(graphics,
+                new Point((int)(initialCoordinate.X + 9.5f * sizeOfTheGridCell), (int)(initialCoordinate.Y + 4.5f * sizeOfTheGridCell)),
+                new Size((int)(13 * sizeOfTheGridCell), (int)(8f * sizeOfTheGridCell)));
+
+            DrawTheText(graphics, "Вы действительно хотите завершить игру?",
+                new RectangleF(new PointF(initialCoordinate.X + 9.5f * sizeOfTheGridCell, initialCoordinate.Y + sizeOfTheGridCell * 5.5f),
+                new SizeF(13 * sizeOfTheGridCell, sizeOfTheGridCell * 4f)), Brushes.LightGoldenrodYellow, new StringFormat()
+                { Alignment = StringAlignment.Center }, sizeOfTheGridCell / 1.2f);
+        }
+
+        void RecalculateTheCoordinatesOfTheConfirmationWindow(object sender, EventArgs e)
+        {
+            yesButton.Location = new Point((int)(initialCoordinate.X + sizeOfTheGridCell * 10.5f),
+                (int)(initialCoordinate.Y + sizeOfTheGridCell * 9.8));
+            yesButton.Size = new Size() { Width = (int)(5 * sizeOfTheGridCell), Height = (int)(2 * sizeOfTheGridCell) };
+
+            noButton.Size = yesButton.Size;
+            noButton.Location = new Point((int)(initialCoordinate.X + sizeOfTheGridCell * 16.5f),
+                (int)(initialCoordinate.Y + sizeOfTheGridCell * 9.8));
+
+            noButton.FlatAppearance.BorderSize = (int)sizeOfTheGridCell / 8;
+            yesButton.FlatAppearance.BorderSize = (int)sizeOfTheGridCell / 8;
+
+            yesButton.Font = new Font(new FontFamily("Courier New"), Math.Max(sizeOfTheGridCell / 1.5f, 1), FontStyle.Bold);
+            noButton.Font = new Font(new FontFamily("Courier New"), Math.Max(sizeOfTheGridCell / 1.5f, 1), FontStyle.Bold);
         }
         #endregion
 
         #region ОКНО РЕЗУЛЬТАТОВ
         void OpenTheResultsWindow()
         {
-            controller.StopTimers();
+            CloseAConfirmationWindow();
             pauseButton.Enabled = false;
-            restartGameButton.Enabled = false;
+            exitButton.Enabled = false;
+
+            controller.StopTimers();
             DeactivateGameManagement();
 
             InitializeTheButtonsInTheResultsMenu();
+
             RecalculateTheCoordinatesOfTheButtonsOfTheResetWindow("", new EventArgs());
+            SizeChanged += RecalculateTheCoordinatesOfTheButtonsOfTheResetWindow;
 
             Paint += DrawTheResultsWindow;
 
-            SizeChanged += RecalculateTheCoordinatesOfTheButtonsOfTheResetWindow;
-
             startOverButton.Click += StartOver;
-            buttonToGoToTheMenu.Click += ReturnToTheMenu;
+            buttonToGoToTheLevelSelection.Click += GoToTheLevelSelectionWindow;
+            Invalidate();
 
         }
         void CloseTheResultsWindow()
@@ -396,38 +603,39 @@ namespace MainWindow
             SizeChanged -= RecalculateTheCoordinatesOfTheButtonsOfTheResetWindow;
 
             startOverButton.Click -= StartOver;
-            buttonToGoToTheMenu.Click -= ReturnToTheMenu;
+            buttonToGoToTheLevelSelection.Click -= GoToTheLevelSelectionWindow;
         }
 
-        void ReturnToTheMenu(object sender, EventArgs e)
+        void GoToTheLevelSelectionWindow(object sender, EventArgs e)
         {
             EraseThePlayingField();
             CloseTheResultsWindow();
-            OpenTheMainMenu();
+            Invalidate();
+            OpenTheLevelSelectionWindow(sender, e);
         }
 
         void InitializeTheButtonsInTheResultsMenu()
         {
-            buttonToGoToTheMenu = new Button()
+            buttonToGoToTheLevelSelection = new Button()
             {
-                BackgroundImage = Image.FromFile(@"..\..\Images\ButtonToGoToTheMenu.png"),
-                BackgroundImageLayout = ImageLayout.Zoom,
+                Text = "Выбрать уровень",
+                ForeColor = Color.LightGoldenrodYellow,
                 BackColor = Color.FromArgb(0, 0, 0, 0),
                 FlatStyle = FlatStyle.Flat
             };
-            Controls.Add(buttonToGoToTheMenu);
-            buttonToGoToTheMenu.FlatAppearance.BorderColor = Color.DarkRed;
-            buttonToGoToTheMenu.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
+            Controls.Add(buttonToGoToTheLevelSelection);
+            buttonToGoToTheLevelSelection.FlatAppearance.BorderColor = Color.LightGoldenrodYellow;
+            buttonToGoToTheLevelSelection.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
 
             startOverButton = new Button()
             {
-                BackgroundImage = Image.FromFile(@"..\..\Images\StartOver.png"),
-                BackgroundImageLayout = ImageLayout.Zoom,
+                Text = "Начать заново",
+                ForeColor = Color.LightGoldenrodYellow,
                 BackColor = Color.FromArgb(0, 0, 0, 0),
                 FlatStyle = FlatStyle.Flat
             };
             Controls.Add(startOverButton);
-            startOverButton.FlatAppearance.BorderColor = Color.DarkRed;
+            startOverButton.FlatAppearance.BorderColor = Color.LightGoldenrodYellow;
             startOverButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 0, 0, 0);
         }
 
@@ -440,56 +648,54 @@ namespace MainWindow
 
         void DrawTheResultsWindow(object sender, PaintEventArgs e)
         {
-            DrawTheBackgroundOfTheResultsWindow(e.Graphics);
+            var graphics = e.Graphics;
+            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-            DrawTheText(e, "Игра завершена!",
-                new RectangleF(new PointF(initialCoordinate.X + 8 * sizeOfTheGridCell, initialCoordinate.Y + sizeOfTheGridCell * 5f),
-                new SizeF(16 * sizeOfTheGridCell, sizeOfTheGridCell * 1.5f)), Brushes.DarkRed, new StringFormat()
-                { Alignment = StringAlignment.Center }, sizeOfTheGridCell / 1.2f);
+            DrawAWindow(graphics, new Point((int)(initialCoordinate.X + 9.5 * sizeOfTheGridCell), (int)(initialCoordinate.Y + 5f * sizeOfTheGridCell)), new Size((int)(13 * sizeOfTheGridCell), (int)(6.5f * sizeOfTheGridCell)));
 
-            DrawTheText(e, String.Format("{0, -6} {1, 9}", "Счёт", model.NumberOfBotsDestroyed),
-                new RectangleF(new PointF(initialCoordinate.X + sizeOfTheGridCell * 10.3f, initialCoordinate.Y + sizeOfTheGridCell * 6.5f),
-                new SizeF(16 * sizeOfTheGridCell, sizeOfTheGridCell * 1.5f)), Brushes.White, new StringFormat(), sizeOfTheGridCell / 1.34f);
+            DrawTheText(graphics, "Игра завершена!",
+                new RectangleF(new PointF(initialCoordinate.X + 9 * sizeOfTheGridCell, initialCoordinate.Y + sizeOfTheGridCell * 5.5f),
+                new SizeF(14 * sizeOfTheGridCell, sizeOfTheGridCell * 1.5f)), Brushes.Red, new StringFormat()
+                { Alignment = StringAlignment.Center }, sizeOfTheGridCell / 1.1f);
 
-            DrawAPicture(@"..\..\Images\star.png", new PointF(initialCoordinate.X + sizeOfTheGridCell * 20.8f, initialCoordinate.Y + 6.63f * sizeOfTheGridCell),
-                new SizeF(sizeOfTheGridCell * 0.7f, sizeOfTheGridCell * 0.7f), e.Graphics);
+            DrawTheText(graphics, String.Format("{0, -6} {1, 9}", "Счёт", model.NumberOfBotsDestroyed).Replace(' ', '.'),
+                new RectangleF(new PointF(initialCoordinate.X + sizeOfTheGridCell * 10.2f, initialCoordinate.Y + sizeOfTheGridCell * 7f),
+                new SizeF(14 * sizeOfTheGridCell, sizeOfTheGridCell * 1.3f)), Brushes.LightGoldenrodYellow, new StringFormat(), sizeOfTheGridCell / 1.34f);
 
-            DrawTheText(e, String.Format("{0, -6} {1, 9}", "Монеты", 0),
-                new RectangleF(new PointF(initialCoordinate.X + sizeOfTheGridCell * 10.3f, initialCoordinate.Y + 7.7f * sizeOfTheGridCell),
-                new SizeF(12 * sizeOfTheGridCell, sizeOfTheGridCell)), Brushes.White, new StringFormat(), sizeOfTheGridCell / 1.34f);
-
-            DrawAPicture(@"..\..\Images\Coin.png", new PointF(initialCoordinate.X + sizeOfTheGridCell * 20.8f, initialCoordinate.Y + 7.83f * sizeOfTheGridCell),
-                new SizeF(sizeOfTheGridCell * 0.7f, sizeOfTheGridCell * 0.7f), e.Graphics);
-        }
-
-        void DrawTheBackgroundOfTheResultsWindow(Graphics graphics)
-        {
-            DrawAPicture(@"..\..\Images\haze.png", new PointF(0, 0), ClientSize, graphics);
-
-            DrawAPicture(@"..\..\Images\ResultsWindow.png", new PointF(initialCoordinate.X + 9.5f * sizeOfTheGridCell,
-                initialCoordinate.X + 4f * sizeOfTheGridCell), new SizeF(13 * sizeOfTheGridCell, 7.5f * sizeOfTheGridCell), graphics);
+            DrawAPicture(@"..\..\Images\star.png", new PointF(initialCoordinate.X + sizeOfTheGridCell * 20.6f, initialCoordinate.Y + 7.13f * sizeOfTheGridCell), new SizeF(sizeOfTheGridCell * 0.7f, sizeOfTheGridCell * 0.7f), graphics);
         }
 
         void RecalculateTheCoordinatesOfTheButtonsOfTheResetWindow(object sender, EventArgs e)
         {
-            buttonToGoToTheMenu.Location = new System.Drawing.Point((int)(initialCoordinate.X + sizeOfTheGridCell * 10.5f),
-                (int)(initialCoordinate.Y + sizeOfTheGridCell * 9.3));
-            buttonToGoToTheMenu.Size = new Size() { Width = (int)(5 * sizeOfTheGridCell), Height = (int)(2 * sizeOfTheGridCell) };
+            buttonToGoToTheLevelSelection.Location = new Point((int)(initialCoordinate.X + sizeOfTheGridCell * 10.4f),
+                (int)(initialCoordinate.Y + sizeOfTheGridCell * 8.5));
+            buttonToGoToTheLevelSelection.Size = new Size() { Width = (int)(5 * sizeOfTheGridCell), Height = (int)(2.5 * sizeOfTheGridCell) };
 
-            startOverButton.Size = buttonToGoToTheMenu.Size;
-            startOverButton.Location = new System.Drawing.Point((int)(initialCoordinate.X + sizeOfTheGridCell * 16.5f),
-                (int)(initialCoordinate.Y + sizeOfTheGridCell * 9.3));
+            startOverButton.Size = buttonToGoToTheLevelSelection.Size;
+            startOverButton.Location = new Point((int)(initialCoordinate.X + sizeOfTheGridCell * 16.3f),
+                (int)(initialCoordinate.Y + sizeOfTheGridCell * 8.5));
 
-            startOverButton.FlatAppearance.BorderSize = (int)sizeOfTheGridCell / 9;
-            buttonToGoToTheMenu.FlatAppearance.BorderSize = (int)sizeOfTheGridCell / 9; ;
+            startOverButton.FlatAppearance.BorderSize = (int)sizeOfTheGridCell / 8;
+            buttonToGoToTheLevelSelection.FlatAppearance.BorderSize = (int)sizeOfTheGridCell / 8; ;
+
+            buttonToGoToTheLevelSelection.Font = new Font(new FontFamily("Courier New"), Math.Max(sizeOfTheGridCell / 1.5f, 1), FontStyle.Bold);
+            startOverButton.Font = new Font(new FontFamily("Courier New"), Math.Max(sizeOfTheGridCell / 1.5f, 1), FontStyle.Bold);
+
         }
         #endregion
 
         #region ПРОЧЕЕ
 
+        void DrawAWindow(Graphics graphics, Point startingPoint, Size size)
+        {
+            DrawAPicture(@"..\..\Images\haze.png", new PointF(0, 0), ClientSize, graphics);
+
+            graphics.DrawRectangle(new Pen(Color.LightGoldenrodYellow, sizeOfTheGridCell / 5), new Rectangle(startingPoint, size));
+        }
+
         InfoAboutTheLevel[][] ReadTheSavedData()
         {
-            return File.ReadAllText(@"..\..\View\Record.txt").Split('\n')
+            return File.ReadAllText(@"..\..\View\LevelData.txt").Split('\n')
                 .Take(LevelButtons.GetLength(0))
                 .Select(line => line.Split('\t').Select(str => str.Split(';')))
                 .Select(line => line.Select(array => new InfoAboutTheLevel(array)).ToArray())
@@ -498,28 +704,38 @@ namespace MainWindow
 
         void RecordTheResults()
         {
+            var dataHasBeenUpdated = false;
+
+            if (model.AmountOfTimeUntilTheEndOfTheRound == 0 && model.InfoAboutTheLevel.Level != 18)
+            {
+                infoAboutTheLevels[model.InfoAboutTheLevel.Level / LevelButtons.GetLength(1)][model.InfoAboutTheLevel.Level % LevelButtons.GetLength(1)].Available = true;
+                dataHasBeenUpdated = true;
+            }
+
             if (!model.InfoAboutTheLevel.Available ||
                 model.InfoAboutTheLevel.Record < model.NumberOfBotsDestroyed)
             {
                 model.InfoAboutTheLevel.Available = true;
                 model.InfoAboutTheLevel.Record = model.NumberOfBotsDestroyed;
+                dataHasBeenUpdated = true;
+            }
 
-                File.WriteAllLines(@"..\..\View\Record.txt", infoAboutTheLevels
+            if (dataHasBeenUpdated)
+            {
+                File.WriteAllLines(@"..\..\View\LevelData.txt", infoAboutTheLevels
                     .Select(line => string.Join("\t", line.Select(info => info.ToString()))));
             }
         }
 
-        void DrawTheText(PaintEventArgs e, string text, RectangleF location, Brush brushes, StringFormat format, float fontSize)
+        void DrawTheText(Graphics graphics, string text, RectangleF location, Brush brushes, StringFormat format, float fontSize)
         {
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-            e.Graphics.DrawString(text, new Font("Courier New", Math.Max(fontSize, 1), FontStyle.Bold), brushes, location, format);
+            graphics.DrawString(text, new Font("Courier New", Math.Max(fontSize, 1), FontStyle.Bold), brushes, location, format);
         }
 
         void DrawAPicture(string pathToTheFile, PointF location, SizeF size, Graphics graphics)
         {
-            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-
             graphics.DrawImage(Image.FromFile(pathToTheFile), new PointF[]
             {
                 location,
@@ -536,7 +752,7 @@ namespace MainWindow
                 (ClientSize.Height - sizeOfTheGridCell * (model.Map.Height + 1)) / 2 + sizeOfTheGridCell);
         }
 
-        PointF[] RecalculateTheCoordinatesOnTheForm(System.Drawing.Point positionOnTheMap)
+        PointF[] RecalculateTheCoordinatesOnTheForm(Point positionOnTheMap)
         { 
             return new PointF[] {
                 new PointF(positionOnTheMap.X * sizeOfTheGridCell + initialCoordinate.X, positionOnTheMap.Y * sizeOfTheGridCell + initialCoordinate.Y),

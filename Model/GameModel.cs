@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using WindowsForm.Model.GameEntities;
+using WindowsForm.Model.Map;
 using WindowsForm.View;
 
 namespace WindowsForm.Model

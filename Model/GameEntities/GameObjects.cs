@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 
-namespace WindowsForm.Model
+namespace WindowsForm.Model.GameEntities
 {
     public class GameObjects
     {

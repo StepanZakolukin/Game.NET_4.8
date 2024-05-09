@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace WindowsForm.Model
+namespace WindowsForm.Model.GameEntities
 {
     public class Player : Characters
     {

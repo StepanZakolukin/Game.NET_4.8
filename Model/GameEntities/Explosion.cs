@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace WindowsForm.Model
+namespace WindowsForm.Model.GameEntities
 {
     public class Explosion : GameObjects
     {

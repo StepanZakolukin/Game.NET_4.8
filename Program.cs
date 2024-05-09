@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using WindowsForm.Model;
+using WindowsForm.Model.Map;
 
 namespace MainWindow
 {

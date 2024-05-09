@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using WindowsForm.Model.Map;
 
-namespace WindowsForm.Model
+namespace WindowsForm.Model.GameEntities
 {
     public class Bot : Characters
     {
@@ -76,9 +77,7 @@ namespace WindowsForm.Model
 
         bool TryToExecuteAShotOrTurnAroundForAShot(GameModel model)
         {
-            var actionIsCompleted = false;
-            var distance = Location - model.Player.Location;
-
+            (var actionIsCompleted, var distance) = (false, Location - model.Player.Location);
             if (distance.Y < 0 && distance.X == 0 && Enumerable.Range(Location.Y + 1,
                 Math.Abs(distance.Y) - 1).All(y => model.Map[Location.X, y].All(creature => !(creature is Wall) && !(creature is Bot))))
             {
@@ -111,9 +110,7 @@ namespace WindowsForm.Model
                 else Shoot(model);
                 actionIsCompleted = true;
             }
-
             AngleInDegrees %= 360;
-
             return actionIsCompleted;
         }
     }

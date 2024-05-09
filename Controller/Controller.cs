@@ -7,11 +7,14 @@ namespace WindowsForm.Controller
     public class Controller
     {
         public event Action<bool> PauseIsPressed;
+
         private readonly GameModel Model;
+
         private Timer MainTimer;
         private Timer GameTimeTimer;
         private Timer BotManagementTimer;
         private Timer BotCreationTimer;
+
         public Controller(GameModel model) 
         {
             Model = model;

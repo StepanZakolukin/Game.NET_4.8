@@ -1,4 +1,4 @@
-﻿namespace WindowsForm.Model
+﻿namespace WindowsForm.Model.GameEntities
 {
     public class Stone : GameObjects
     {
