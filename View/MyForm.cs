@@ -63,7 +63,7 @@ namespace MainWindow
 
             SizeChanged += UpdateFieldValues;
             Load += (sender, args) => OnSizeChanged(EventArgs.Empty);
-
+            FormClosing += SaveTheGameResults;
             InitializeComponent();
         }
 
@@ -704,12 +704,9 @@ namespace MainWindow
 
         void RecordTheResults()
         {
-            var dataHasBeenUpdated = false;
-
             if (model.AmountOfTimeUntilTheEndOfTheRound == 0 && model.InfoAboutTheLevel.Level != 18)
             {
                 infoAboutTheLevels[model.InfoAboutTheLevel.Level / LevelButtons.GetLength(1)][model.InfoAboutTheLevel.Level % LevelButtons.GetLength(1)].Available = true;
-                dataHasBeenUpdated = true;
             }
 
             if (!model.InfoAboutTheLevel.Available ||
@@ -717,14 +714,15 @@ namespace MainWindow
             {
                 model.InfoAboutTheLevel.Available = true;
                 model.InfoAboutTheLevel.Record = model.NumberOfBotsDestroyed;
-                dataHasBeenUpdated = true;
             }
+        }
 
-            if (dataHasBeenUpdated)
-            {
-                File.WriteAllLines(@"..\..\View\LevelData.txt", infoAboutTheLevels
+        void SaveTheGameResults(object sender, FormClosingEventArgs e)
+        {
+            RecordTheResults();
+
+            File.WriteAllLines(@"..\..\View\LevelData.txt", infoAboutTheLevels
                     .Select(line => string.Join("\t", line.Select(info => info.ToString()))));
-            }
         }
 
         void DrawTheText(Graphics graphics, string text, RectangleF location, Brush brushes, StringFormat format, float fontSize)
