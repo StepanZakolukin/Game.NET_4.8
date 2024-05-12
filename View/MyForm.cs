@@ -363,12 +363,11 @@ namespace MainWindow
 
         public void StartTheNextLevel()
         {
-            RecordTheResults();
-
             if (!model.Map[model.Player.Location].Contains(model.Player) || model.InfoAboutTheLevel.Level == 18)
                 OpenTheResultsWindow();
             else
             {
+                RecordTheResults();
                 EraseThePlayingField();
                 DeactivateGameManagement();
                 OpenTheGame(model.InfoAboutTheLevel.Level + 1);
@@ -474,7 +473,6 @@ namespace MainWindow
         #region ОКНО ПОДТВЕРЖДЕНИЯ
         void OpenAConfirmationWindow(object sender, EventArgs e)
         {
-            RecordTheResults();
             exitButton.Enabled = false;
             pauseButton.Enabled = false;
             Paint += DrawAConfirmationWindow;
@@ -581,6 +579,8 @@ namespace MainWindow
         #region ОКНО РЕЗУЛЬТАТОВ
         void OpenTheResultsWindow()
         {
+            RecordTheResults();
+
             CloseAConfirmationWindow();
             pauseButton.Enabled = false;
             exitButton.Enabled = false;

@@ -78,7 +78,8 @@ namespace WindowsForm.Model
                 }
 
             StateChanged();
-            if (AmountOfTimeUntilTheEndOfTheRound < 1 || !Map[Player.Location].Contains(Player)) TheGameIsOver();
+            if (AmountOfTimeUntilTheEndOfTheRound < 1 || !Map[Player.Location].Contains(Player)
+                || NumberOfBotsDestroyed == InfoAboutTheLevel.PossibleNumberOfPoints) TheGameIsOver();
         }
 
         private List<GameObjects> SelectWinnerCandidatePerLocation(List<GameObjects>[,] creatures, int x, int y)
