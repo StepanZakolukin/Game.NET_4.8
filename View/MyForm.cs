@@ -410,6 +410,10 @@ namespace MainWindow
                 new PointF(initialCoordinate.X + 9f * sizeOfTheGridCell, initialCoordinate.Y + sizeOfTheGridCell * 6f),
                 new SizeF(14 * sizeOfTheGridCell, sizeOfTheGridCell * 2.5f)), Brushes.LightGoldenrodYellow,
                 new StringFormat() { Alignment = StringAlignment.Center }, 1.5f * sizeOfTheGridCell);
+
+            graphics.DrawString("Кликните по экрану, чтобы начать игру.", new Font("Courier New", Math.Max(sizeOfTheGridCell / 2, 1)), Brushes.LightGoldenrodYellow, new RectangleF(
+                new PointF(initialCoordinate.X + 6f * sizeOfTheGridCell, initialCoordinate.Y + sizeOfTheGridCell * 15f),
+                new SizeF(20 * sizeOfTheGridCell, sizeOfTheGridCell * 2.5f)), new StringFormat() { Alignment = StringAlignment.Center });
         }
 
         void DrawAGamePanel(object sender, PaintEventArgs e)
@@ -470,6 +474,7 @@ namespace MainWindow
         #region ОКНО ПОДТВЕРЖДЕНИЯ
         void OpenAConfirmationWindow(object sender, EventArgs e)
         {
+            RecordTheResults();
             exitButton.Enabled = false;
             pauseButton.Enabled = false;
             Paint += DrawAConfirmationWindow;
@@ -727,8 +732,6 @@ namespace MainWindow
 
         void DrawTheText(Graphics graphics, string text, RectangleF location, Brush brushes, StringFormat format, float fontSize)
         {
-            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-
             graphics.DrawString(text, new Font("Courier New", Math.Max(fontSize, 1), FontStyle.Bold), brushes, location, format);
         }
 
