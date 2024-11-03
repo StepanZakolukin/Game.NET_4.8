@@ -189,6 +189,9 @@
     <Content Include="Images\Warrior.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Images\Крепость.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Model\Map\Map.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

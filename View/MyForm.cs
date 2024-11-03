@@ -38,6 +38,7 @@ namespace MainWindow
 
         public MyForm(GameModel model)
         {
+            InitializeComponent();
             this.model = model;
             LevelButtons = new Button[3, 6];
             infoAboutTheLevels = ReadTheSavedData();
@@ -64,7 +65,7 @@ namespace MainWindow
             SizeChanged += UpdateFieldValues;
             Load += (sender, args) => OnSizeChanged(EventArgs.Empty);
             FormClosing += SaveTheGameResults;
-            InitializeComponent();
+            Icon = new Icon(@"Images\Крепость.ico");
         }
 
         #region ГЛАВНОЕ МЕНЮ
