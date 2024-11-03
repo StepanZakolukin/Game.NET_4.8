@@ -4,7 +4,7 @@ namespace WindowsForm.Model.GameEntities
 {
     public class Mine : GameObjects
     {
-        public Mine(Point location, string pathToTheFile = @"..\..\Images\Mine.png", int health = 1, int renderingPriority = 3, int priority = 0, int angleInDegrees = 90)
+        public Mine(Point location, string pathToTheFile = @"Images\Mine.png", int health = 1, int renderingPriority = 3, int priority = 0, int angleInDegrees = 90)
             : base(location, pathToTheFile, health, renderingPriority, priority, angleInDegrees)
         {
         }

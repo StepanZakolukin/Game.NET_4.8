@@ -7,7 +7,7 @@ namespace WindowsForm.Model.GameEntities
 {
     public class Bot : Characters
     {
-        public Bot(Point location, int angleInDegrees, string pathToTheFile = @"..\..\Images\Bot.png", int health = 1)
+        public Bot(Point location, int angleInDegrees, string pathToTheFile = @"Images\Bot.png", int health = 1)
             : base(location, pathToTheFile, health, angleInDegrees)
         {
         }
