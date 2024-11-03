@@ -3,11 +3,11 @@ using System.Drawing;
 using System.Windows.Forms;
 using WindowsForm.Model;
 using WindowsForm.Controller;
-using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using WindowsForm.View;
 using Point = System.Drawing.Point;
+using WindowsForm.Properties;
 
 namespace MainWindow
 {
@@ -701,7 +701,7 @@ namespace MainWindow
 
         InfoAboutTheLevel[][] ReadTheSavedData()
         {
-            return File.ReadAllText(@"View\LevelData.txt").Split('\n')
+            return Settings.Default.LevelData.Split('\n')
                 .Take(LevelButtons.GetLength(0))
                 .Select(line => line.Split('\t').Select(str => str.Split(';')))
                 .Select(line => line.Select(array => new InfoAboutTheLevel(array)).ToArray())
@@ -727,8 +727,11 @@ namespace MainWindow
         {
             RecordTheResults();
 
-            File.WriteAllLines(@"View\LevelData.txt", infoAboutTheLevels
+            Settings.Default.LevelData = string.Join("\n", infoAboutTheLevels
                     .Select(line => string.Join("\t", line.Select(info => info.ToString()))));
+
+            Settings.Default.Save();
+            Settings.Default.Reload();
         }
 
         void DrawTheText(Graphics graphics, string text, RectangleF location, Brush brushes, StringFormat format, float fontSize)
